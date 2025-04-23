@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"packx/models"
+	"packx/reader"
 	"packx/utils"
 	"packx/writer"
 	"sync"
@@ -46,6 +47,8 @@ func InitDB(dataWriteCh <-chan []models.Metric, queryReceiveCh <-chan models.Que
 		}
 
 	}()
+
+	go reader.InitQueryEngine(queryReceiveCh, queryResponseCh, &dbInternalWg)
 
 	go func() {
 

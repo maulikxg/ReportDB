@@ -11,10 +11,10 @@ import (
 
 func PollCPUData(pollData chan<- models.Metric) {
 
-	// SSH connection details
+	//SSH connection details
 	//config := &ssh.ClientConfig{
 	//
-	//	User: "maulikpuri",
+	//	User: "harekrushn",
 	//
 	//	Auth: []ssh.AuthMethod{
 	//		ssh.Password("Mind@123"),
@@ -27,7 +27,7 @@ func PollCPUData(pollData chan<- models.Metric) {
 
 	config := &ssh.ClientConfig{
 
-		User: "dhyanesh",
+		User: "maulikpuri",
 
 		Auth: []ssh.AuthMethod{
 			ssh.Password("Mind@123"),
@@ -38,10 +38,24 @@ func PollCPUData(pollData chan<- models.Metric) {
 		Timeout: 10 * time.Second,
 	}
 
+	//config := &ssh.ClientConfig{
+	//
+	//	User: "dhyanesh",
+	//
+	//	Auth: []ssh.AuthMethod{
+	//		ssh.Password("Mind@123"),
+	//	},
+	//
+	//	HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+	//
+	//	Timeout: 10 * time.Second,
+	//}
+
 	for {
 
 		// Connect to SSH server
-		client, err := ssh.Dial("tcp", "10.20.40.103:8008", config)
+		// client, err := ssh.Dial("tcp", "10.20.40.103:8008", config)
+		client, err := ssh.Dial("tcp", "192.168.1.10:22", config)
 
 		if err != nil {
 
@@ -101,7 +115,7 @@ func PollCPUData(pollData chan<- models.Metric) {
 			// Create metric
 			metric := models.Metric{
 
-				ObjectID: 2, // Using fixed device ID for example
+				ObjectID: 1, // Using fixed device ID for example
 
 				CounterId: 1, // Counter ID for CPU
 

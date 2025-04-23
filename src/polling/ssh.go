@@ -58,15 +58,21 @@ func initZmq() error {
 
 }
 
-func PollData(wg sync.WaitGroup) {
+func PollData(wg *sync.WaitGroup) {
+
 	defer wg.Done()
 
 	// Initialize ZMQ
 	if err := initZmq(); err != nil {
+
 		log.Printf("Failed to initialize ZMQ: %v", err)
+
 		return
+
 	}
+
 	defer pushSocket.Close()
+
 	defer zmqContext.Term()
 
 	// Create channel for metrics
@@ -77,30 +83,42 @@ func PollData(wg sync.WaitGroup) {
 
 	// Send metrics through ZMQ socket
 	for metric := range pollData {
+
 		// Convert metric to data format
 		metricData := data{
-			ObjectID:  metric.ObjectID,
+
+			ObjectID: metric.ObjectID,
+
 			CounterId: metric.CounterId,
-			Value:     metric.Value,
+
+			Value: metric.Value,
+
 			Timestamp: metric.Timestamp,
 		}
 
 		// Marshal to JSON for sending
 		jsonData, err := json.Marshal(metricData)
+
 		if err != nil {
+
 			log.Printf("Error marshaling metric: %v", err)
+
 			continue
+
 		}
 
 		// Send through ZMQ socket
 		_, err = pushSocket.SendBytes(jsonData, 0)
+
 		if err != nil {
+
 			log.Printf("Error sending metric through ZMQ: %v", err)
+
 			continue
+
 		}
 
-		log.Printf("Sent metric through ZMQ: counterID=%d , DeviceID=%d, CPU=%.2f%%",
-			metric.CounterId, metric.ObjectID, metric.Value)
+		log.Printf("Sent metric through ZMQ: counterID=%d , DeviceID=%d, CPU=%.2f%%", metric.CounterId, metric.ObjectID, metric.Value)
 	}
 }
 
