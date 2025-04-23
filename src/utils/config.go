@@ -205,3 +205,8 @@ func GetCounterType(counterID uint16) (byte, error) {
 	}
 
 }
+
+// Add this function to get storage path
+func GetStoragePath() string {
+	return config.StoragePath
+}

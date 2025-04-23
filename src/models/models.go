@@ -24,10 +24,12 @@ type Query struct {
 	ObjectIDs []uint32 `json:"Object_id"`
 
 	CounterId uint16 `json:"counter_id"`
+
+	Aggregation string `json:"aggregation"`
 }
 
 type QueryResponse struct {
 	QueryID uint64 `json:"query_id"`
 
-	Data map[uint32]DataPoint `json:"data"`
+	Data map[uint32][]DataPoint `json:"data"`
 }

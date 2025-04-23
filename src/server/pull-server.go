@@ -10,7 +10,7 @@ import (
 
 //func InitPollListener()
 
-func ServerPull(pollData chan<- models.Metric) {
+func PullServer(pollData chan<- models.Metric) {
 
 	context, err := zmq.NewContext()
 
@@ -59,6 +59,8 @@ func ServerPull(pollData chan<- models.Metric) {
 			continue
 
 		}
+
+		log.Println("Received metric:", metric)
 
 		// Send to channel for processing
 		select {

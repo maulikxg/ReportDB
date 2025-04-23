@@ -19,11 +19,11 @@ func writer(writersChannel <-chan WriteObjectWiseBatch, storageEn *storageEngine
 
 	defer writerWaitGroup.Done()
 
-	basePath := utils.BaseDirProvider()
+	//basePath := utils.BaseDirProvider()
 
 	for dataBatch := range writersChannel {
 
-		log.Printf("Writer received batch for ObjectId: %d, CounterId: %d, Count: %d\\n", dataBatch.ObjectId, dataBatch.CounterId, len(dataBatch.Values))
+		log.Printf("Writer received batch for ObjectId: %d, CounterId: %d, Count: %d\n", dataBatch.ObjectId, dataBatch.CounterId, len(dataBatch.Values))
 
 		for _, dp := range dataBatch.Values {
 
@@ -44,9 +44,11 @@ func writer(writersChannel <-chan WriteObjectWiseBatch, storageEn *storageEngine
 			dateStr := timestamp.Format("2006/01/02")
 
 			counterPath := filepath.Join(
-				basePath,
-				"storage",
+
+				utils.GetStoragePath(),
+
 				dateStr,
+
 				fmt.Sprintf("counter_%d", metric.CounterId),
 			)
 
@@ -77,11 +79,11 @@ func writer(writersChannel <-chan WriteObjectWiseBatch, storageEn *storageEngine
 				continue
 			}
 
-			log.Printf("Successfully stored metric for ObjectId: %d, Timestamp: %d, Value: %v\\n", dataBatch.ObjectId, dp.Timestamp, dp.Value)
+			log.Printf("Successfully stored metric for ObjectId: %d, Timestamp: %d, Value: %v\n", dataBatch.ObjectId, dp.Timestamp, dp.Value)
 
 		}
 
-		log.Printf("Writer finished processing batch for ObjectId: %d\\n", dataBatch.ObjectId)
+		log.Printf("Writer finished processing batch for ObjectId: %d\n", dataBatch.ObjectId)
 	}
 
 	log.Println("Writer exiting.")
@@ -91,7 +93,9 @@ func writer(writersChannel <-chan WriteObjectWiseBatch, storageEn *storageEngine
 func serializeMetric(metric models.Metric) ([]byte, error) {
 
 	// Validate the metric value type
-	
+
+	log.Println(metric)
+
 	if err := ValidateMetricValueType(&metric); err != nil {
 
 		return nil, err
@@ -100,7 +104,7 @@ func serializeMetric(metric models.Metric) ([]byte, error) {
 	buf := new(bytes.Buffer)
 
 	// Write timestamp first (this is important for the storage engine)
-	if err := binary.Write(buf, binary.LittleEndian, metric); err != nil {
+	if err := binary.Write(buf, binary.LittleEndian, metric.Timestamp); err != nil {
 
 		return nil, fmt.Errorf("failed to write Timestamp: %v", err)
 
@@ -287,19 +291,3 @@ func convertToInt64(v interface{}) int64 {
 
 	}
 }
-
-//for dataBatch := range writersChannel {
-//
-//	log.Printf("Writer received batch for ObjectId: %d, Count: %d\n", dataBatch.ObjectId, len(dataBatch.Values))
-//
-//	// Simulate data processing/writing to storage
-//	for _, dp := range dataBatch.Values {
-//
-//		log.Printf("  Processing ObjectId: %d, Timestamp: %d, Value: %f\n", dataBatch.ObjectId, dp.Timestamp, dp.Value)
-//
-//	}
-//
-//	log.Printf("Writer finished processing batch for ObjectId: %d\n", dataBatch.ObjectId)
-//}
-//
-//log.Println("Writer exiting.")

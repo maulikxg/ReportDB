@@ -1,22 +1,23 @@
 package polling
 
 import (
-	"fmt"
+	"encoding/json"
 	zmq "github.com/pebbe/zmq4"
 	"log"
-	"math/rand"
 	"packx/models"
 
 	//. "packx/storageEngine"
 	"sync"
-	"time"
 )
 
 type data struct {
-	DeviceID  int
-	CounterID int
-	Value     interface{}
-	Timestamp int64
+	ObjectID uint32 `json:"Object_id"`
+
+	CounterId uint16 `json:"counter_id"`
+
+	Value interface{} `json:"value"`
+
+	Timestamp uint32 `json:"timestamp"`
 }
 
 var (
@@ -60,71 +61,99 @@ func initZmq() error {
 func PollData(wg sync.WaitGroup) {
 	defer wg.Done()
 
+	// Initialize ZMQ
+	if err := initZmq(); err != nil {
+		log.Printf("Failed to initialize ZMQ: %v", err)
+		return
+	}
+	defer pushSocket.Close()
+	defer zmqContext.Term()
+
 	// Create channel for metrics
 	pollData := make(chan models.Metric, 100)
 
 	// Start CPU polling
 	go PollCPUData(pollData)
 
-	// Your existing push socket logic remains unchanged
+	// Send metrics through ZMQ socket
 	for metric := range pollData {
-		// This will use your existing push socket mechanism
-		// to send the metrics to your storage
-		log.Printf("Sending metric: DeviceID=%d, CPU=%.2f%%",
-			metric.ObjectID, metric.Value)
+		// Convert metric to data format
+		metricData := data{
+			ObjectID:  metric.ObjectID,
+			CounterId: metric.CounterId,
+			Value:     metric.Value,
+			Timestamp: metric.Timestamp,
+		}
+
+		// Marshal to JSON for sending
+		jsonData, err := json.Marshal(metricData)
+		if err != nil {
+			log.Printf("Error marshaling metric: %v", err)
+			continue
+		}
+
+		// Send through ZMQ socket
+		_, err = pushSocket.SendBytes(jsonData, 0)
+		if err != nil {
+			log.Printf("Error sending metric through ZMQ: %v", err)
+			continue
+		}
+
+		log.Printf("Sent metric through ZMQ: counterID=%d , DeviceID=%d, CPU=%.2f%%",
+			metric.CounterId, metric.ObjectID, metric.Value)
 	}
 }
 
-func generateMetric(deviceID, counterID int) data {
+//func generateMetric(deviceID, counterID int) data {
+//
+//	metric := data{
+//
+//		DeviceID: deviceID,
+//
+//		CounterID: counterID,
+//
+//		Timestamp: time.Now().Unix(),
+//	}
+//
+//	switch counterID {
+//
+//	case 1:
+//
+//		metric.Value = int64(42 + deviceID)
+//
+//	case 2: // TypeFloat (float64)
+//
+//		metric.Value = 3.14 * float64(deviceID+1)
+//
+//	case 3: // TypeString (string)
+//
+//		metric.Value = fmt.Sprintf("Device-%d-ABC", deviceID)
+//
+//	default:
+//
+//		log.Printf("Unhandled counter ID: %d", counterID)
+//
+//		metric.Value = nil
+//
+//	}
+//
+//	return metric
+//}
 
-	metric := data{
-
-		DeviceID: deviceID,
-
-		CounterID: counterID,
-
-		Timestamp: time.Now().Unix(),
-	}
-
-	switch counterID {
-
-	case 1:
-
-		metric.Value = int64(42 + deviceID)
-
-	case 2: // TypeFloat (float64)
-
-		metric.Value = 3.14 * float64(deviceID+1)
-
-	case 3: // TypeString (string)
-
-		metric.Value = fmt.Sprintf("Device-%d-ABC", deviceID)
-
-	default:
-
-		log.Printf("Unhandled counter ID: %d", counterID)
-
-		metric.Value = nil
-
-	}
-
-	return metric
-}
-
-func GenerateRandomString(length int) string {
-
-	const characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-
-	buff := make([]byte, length)
-
-	for i := range buff {
-
-		buff[i] = characters[rand.Intn(len(characters))]
-
-	}
-
-	return string(buff)
-}
+//func GenerateRandomString(length int) string {
+//
+//	const characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+//
+//	buff := make([]byte, length)
+//
+//	for i := range buff {
+//
+//		buff[i] = characters[rand.Intn(len(characters))]
+//
+//	}
+//
+//	return string(buff)
+//}
 
 //	func generateMetric(deviceID, counterID int) data {
 //		metric := data{

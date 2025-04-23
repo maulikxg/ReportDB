@@ -4,8 +4,6 @@ import (
 	"golang.org/x/crypto/ssh"
 	"log"
 	"packx/models"
-
-	//. "packx/storageEngine"
 	"strconv"
 	"strings"
 	"time"
@@ -103,7 +101,7 @@ func PollCPUData(pollData chan<- models.Metric) {
 			// Create metric
 			metric := models.Metric{
 
-				ObjectID: 1, // Using fixed device ID for example
+				ObjectID: 2, // Using fixed device ID for example
 
 				CounterId: 1, // Counter ID for CPU
 

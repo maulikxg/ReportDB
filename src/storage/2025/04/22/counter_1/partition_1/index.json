@@ -2,7 +2,7 @@
     {
         "device_id": 1,
         "date": "",
-        "block_offset": 4096,
+        "block_offset": 0,
         "current_offset": 0
     }
 ]
