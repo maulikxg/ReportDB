@@ -7,7 +7,6 @@ import (
 	"os"
 	. "packx/utils"
 	"path/filepath"
-	"time"
 )
 
 // gets the current storage path
@@ -22,76 +21,60 @@ func (bs *StorageEngine) getStoragePath() string {
 }
 
 func (bs *StorageEngine) updateIndex(indexPath string, deviceID int, offset int64) error {
-
 	var index []IndexEntry
 
 	// Check if file exists
 	if _, err := os.Stat(indexPath); !os.IsNotExist(err) {
-
 		// Read existing index if it exists
 		data, err := os.ReadFile(indexPath)
-
 		if err != nil {
-
 			return fmt.Errorf("failed to read index file: %v", err)
-
 		}
 
 		// Skip empty files
 		if len(data) > 0 {
-
 			if err := json.Unmarshal(data, &index); err != nil {
-
 				// If cannot parse, start with empty index
 				index = []IndexEntry{}
-
 			}
-
 		}
-
 	}
+
+	bs.blockManager.mu.Lock()
+	currentOffset, hasCurrent := bs.blockManager.currentBlock[deviceID]
+	bs.blockManager.mu.Unlock()
 
 	// Add or update entry
 	entry := IndexEntry{
-
-		DeviceID: deviceID,
-
-		BlockOffset: offset,
+		DeviceID:      deviceID,
+		BlockOffset:   offset,
+		CurrentOffset: currentOffset,
 	}
 
 	found := false
-
 	for i, e := range index {
-
 		if e.DeviceID == deviceID {
-
+			// Preserve the block offset if it's not a new block allocation
+			if hasCurrent && offset == currentOffset {
+				entry.BlockOffset = e.BlockOffset
+			}
 			index[i] = entry
-
 			found = true
-
 			break
-
 		}
 	}
 	if !found {
-
 		index = append(index, entry)
-
 	}
 
 	// Write updated index
 	data, err := json.MarshalIndent(index, "", "    ")
-
 	if err != nil {
-
 		return fmt.Errorf("failed to marshal index: %v", err)
-
 	}
 
 	if err := os.WriteFile(indexPath, data, 0644); err != nil {
-
 		return fmt.Errorf("failed to write index: %v", err)
-
 	}
 
 	return nil
@@ -132,22 +115,11 @@ func (bs *StorageEngine) readIndex(indexPath string) ([]IndexEntry, error) {
 	return index, nil
 }
 
-func getDate(ts int64) string {
-
-	return time.Unix(ts, 0).Format("2006-01-02")
-
-}
-
-func extractTimestampFromData(data []byte) (int64, error) {
-
+func extractTimestampFromData(data []byte) (uint32, error) {
 	if len(data) == 0 {
-
 		return 0, fmt.Errorf("empty data")
-
 	}
-
-	return int64(binary.LittleEndian.Uint64(data[:8])), nil
-
+	return binary.LittleEndian.Uint32(data[:4]), nil
 }
 
 func getIndexFilePath(baseDir string, partition int) string {
@@ -212,47 +184,31 @@ func writeIndex(baseDir string, partition int, index []IndexEntry) error {
 	return nil
 }
 
-func findDeviceIndex(index []IndexEntry, deviceID int, date string) (int, bool) {
-
+func findDeviceIndex(index []IndexEntry, deviceID int) (int, bool) {
 	for i, entry := range index {
-
-		if entry.DeviceID == deviceID && entry.Date == date {
-
+		if entry.DeviceID == deviceID {
 			return i, true
 		}
-
 	}
-
 	return -1, false
 }
 
 func getCurrentBlockOffset(index []IndexEntry, deviceID int) (int64, bool) {
-
 	for _, entry := range index {
-
 		if entry.DeviceID == deviceID && entry.CurrentOffset != 0 {
 			return entry.CurrentOffset, true
 		}
-
 	}
-
 	return 0, false
 }
 
 func updateCurrentBlockOffset(index []IndexEntry, deviceID int, offset int64) []IndexEntry {
-
 	for i, entry := range index {
-
 		if entry.DeviceID == deviceID {
-
 			index[i].CurrentOffset = offset
-
 			return index
-
 		}
-
 	}
-
 	return index
 }
 
@@ -299,37 +255,25 @@ func (bs *StorageEngine) getMappedDataFile(path string) (*MappedFile, error) {
 }
 
 func encodeBlockHeader(header BlockHeader) []byte {
-
 	buf := make([]byte, BlockHeaderSize)
-
-	binary.LittleEndian.PutUint32(buf[0:4], uint32(header.DeviceID))
-
-	binary.LittleEndian.PutUint64(buf[4:12], uint64(header.StartTimestamp))
-
-	binary.LittleEndian.PutUint64(buf[12:20], uint64(header.EndTimestamp))
-
-	binary.LittleEndian.PutUint64(buf[20:28], uint64(header.NextBlockOffset))
-
-	binary.LittleEndian.PutUint32(buf[28:32], uint32(header.RecordCount))
-
+	binary.LittleEndian.PutUint32(buf[0:4], header.DeviceID)
+	binary.LittleEndian.PutUint32(buf[4:8], header.StartTimestamp)
+	binary.LittleEndian.PutUint32(buf[8:12], header.EndTimestamp)
+	binary.LittleEndian.PutUint64(buf[12:20], uint64(header.NextBlockOffset))
+	binary.LittleEndian.PutUint32(buf[20:24], header.RecordCount)
+	buf[24] = header.DataType
 	return buf
 }
 
 func decodeBlockHeader(data []byte) BlockHeader {
-
 	return BlockHeader{
-
-		DeviceID: int32(binary.LittleEndian.Uint32(data[0:4])),
-
-		StartTimestamp: int64(binary.LittleEndian.Uint64(data[4:12])),
-
-		EndTimestamp: int64(binary.LittleEndian.Uint64(data[12:20])),
-
-		NextBlockOffset: int64(binary.LittleEndian.Uint64(data[20:28])),
-
-		RecordCount: int32(binary.LittleEndian.Uint32(data[28:32])),
+		DeviceID:        binary.LittleEndian.Uint32(data[0:4]),
+		StartTimestamp:  binary.LittleEndian.Uint32(data[4:8]),
+		EndTimestamp:    binary.LittleEndian.Uint32(data[8:12]),
+		NextBlockOffset: int64(binary.LittleEndian.Uint64(data[12:20])),
+		RecordCount:     binary.LittleEndian.Uint32(data[20:24]),
+		DataType:        data[24],
 	}
-
 }
 
 func encodeOffsetTableEntry(entry OffsetTableEntry) []byte {
@@ -387,3 +331,69 @@ func decodeOffsetTableEntry(data []byte) OffsetTableEntry {
 //	bs.mmapFiles[path] = mmap
 //	return mmap, nil
 //}
+
+// Update getBlockUsage to use proper BlockManager fields
+func (bs *StorageEngine) getBlockUsage(deviceID int, blockOffset int64) (int, error) {
+	bs.blockManager.mu.Lock()
+	defer bs.blockManager.mu.Unlock()
+	
+	if currentOffset, exists := bs.blockManager.currentBlock[deviceID]; exists && blockOffset == currentOffset {
+		if usage, exists := bs.blockManager.blockUsage[deviceID]; exists {
+			return usage, nil
+		}
+	}
+	return BlockSize - BlockHeaderSize, nil // Assume historical blocks are full
+}
+
+// Update hasSpaceInBlock to use proper BlockManager fields
+func (bs *StorageEngine) hasSpaceInBlock(deviceID int, dataSize int) bool {
+	bs.blockManager.mu.Lock()
+	defer bs.blockManager.mu.Unlock()
+	
+	if _, exists := bs.blockManager.currentBlock[deviceID]; exists {
+		if usage, exists := bs.blockManager.blockUsage[deviceID]; exists {
+			return usage+dataSize <= BlockSize-BlockHeaderSize
+		}
+	}
+	return false
+}
+
+// Update updateBlockHeader to use proper BlockManager fields
+func (bs *StorageEngine) updateBlockHeader(mmapFile *MappedFile, offset int64, newData []byte) error {
+	headerData := make([]byte, BlockHeaderSize)
+	if _, err := mmapFile.ReadAt(headerData, offset); err != nil {
+		return fmt.Errorf("failed to read header: %v", err)
+	}
+
+	header := decodeBlockHeader(headerData)
+	header.RecordCount++
+
+	// Update timestamps if data contains timestamp
+	if len(newData) >= 4 {
+		timestamp := binary.LittleEndian.Uint32(newData[:4])
+		if timestamp > header.EndTimestamp {
+			header.EndTimestamp = timestamp
+		}
+		if header.StartTimestamp == 0 {
+			header.StartTimestamp = timestamp
+		}
+	}
+
+	headerBytes := encodeBlockHeader(header)
+	if _, err := mmapFile.WriteAt(headerBytes, offset); err != nil {
+		return fmt.Errorf("failed to update header: %v", err)
+	}
+
+	return nil
+}
+
+// Update initializeBlockHeader to use proper BlockManager fields
+func (bs *StorageEngine) initializeBlockHeader(deviceID int, dataType byte, timestamp uint32) BlockHeader {
+	return BlockHeader{
+		DeviceID:       uint32(deviceID),
+		StartTimestamp: timestamp,
+		EndTimestamp:   timestamp,
+		RecordCount:    1,
+		DataType:       dataType,
+	}
+}

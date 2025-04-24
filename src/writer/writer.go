@@ -91,13 +91,10 @@ func writer(writersChannel <-chan WriteObjectWiseBatch, storageEn *storageEngine
 }
 
 func serializeMetric(metric models.Metric) ([]byte, error) {
-
 	// Validate the metric value type
-
 	log.Println(metric)
 
 	if err := ValidateMetricValueType(&metric); err != nil {
-
 		return nil, err
 	}
 
@@ -105,71 +102,50 @@ func serializeMetric(metric models.Metric) ([]byte, error) {
 
 	// Write timestamp first (this is important for the storage engine)
 	if err := binary.Write(buf, binary.LittleEndian, metric.Timestamp); err != nil {
-
 		return nil, fmt.Errorf("failed to write Timestamp: %v", err)
-
 	}
 
 	// Write the value based on its type
 	switch v := metric.Value.(type) {
-
-	case int:
-
-		if err := binary.Write(buf, binary.LittleEndian, int64(v)); err != nil {
-
+	case int, int32, int64:
+		var val int64
+		switch vt := v.(type) {
+		case int:
+			val = int64(vt)
+		case int32:
+			val = int64(vt)
+		case int64:
+			val = vt
+		}
+		if err := binary.Write(buf, binary.LittleEndian, val); err != nil {
 			return nil, fmt.Errorf("failed to write int value: %v", err)
-
 		}
 
-	case int32:
-
-		if err := binary.Write(buf, binary.LittleEndian, int64(v)); err != nil {
-
-			return nil, fmt.Errorf("failed to write int32 value: %v", err)
-
+	case float32, float64:
+		var val float64
+		switch vt := v.(type) {
+		case float32:
+			val = float64(vt)
+		case float64:
+			val = vt
 		}
-	case int64:
-
-		if err := binary.Write(buf, binary.LittleEndian, v); err != nil {
-
-			return nil, fmt.Errorf("failed to write int64 value: %v", err)
-
-		}
-
-	case float32:
-
-		if err := binary.Write(buf, binary.LittleEndian, float64(v)); err != nil {
-
-			return nil, fmt.Errorf("failed to write float32 value: %v", err)
-
-		}
-
-	case float64:
-
-		if err := binary.Write(buf, binary.LittleEndian, v); err != nil {
-
-			return nil, fmt.Errorf("failed to write float64 value: %v", err)
-
+		if err := binary.Write(buf, binary.LittleEndian, val); err != nil {
+			return nil, fmt.Errorf("failed to write float value: %v", err)
 		}
 
 	case string:
-
-		// Write string length
-		if err := binary.Write(buf, binary.LittleEndian, uint32(len(v))); err != nil {
-
+		// Write string length first
+		strLen := uint32(len(v))
+		if err := binary.Write(buf, binary.LittleEndian, strLen); err != nil {
 			return nil, fmt.Errorf("failed to write string length: %v", err)
-
 		}
-
 		// Write string data
 		if _, err := buf.WriteString(v); err != nil {
 			return nil, fmt.Errorf("failed to write string value: %v", err)
 		}
 
 	default:
-
 		return nil, fmt.Errorf("unsupported value type: %T", v)
-
 	}
 
 	return buf.Bytes(), nil

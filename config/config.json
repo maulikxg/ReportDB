@@ -2,7 +2,7 @@
     "writers": 4,
     "readers": 4,
     "num_of_partitions": 10,
-    "block_size": 4096,
+    "block_size": 1024,
     "max_devices": 10,
     "initial_mmap": 1024,
     "max_blocks_per_device": 1000,

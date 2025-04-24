@@ -6,7 +6,7 @@ const (
 	BlockSize = 4 * 1024
 
 	// BlockHeaderSize is the size of block header
-	BlockHeaderSize = 32
+	BlockHeaderSize = 25
 
 	// OffsetTableEntrySize is the size of each offset table entry
 	OffsetTableEntrySize = 16
@@ -29,7 +29,7 @@ const (
 	NumCounters = 3
 
 	// StoragePath is the base path for storage
-	StoragePath = "storage"
+	//StoragePath = "storage"
 
 	//// Data type markers
 	//TypeFloat  = byte(1)

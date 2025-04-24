@@ -11,15 +11,12 @@ import (
 )
 
 type BlockHeader struct {
-	DeviceID int32
-
-	StartTimestamp int64
-
-	EndTimestamp int64
-
-	NextBlockOffset int64
-
-	RecordCount int32
+	DeviceID        uint32 // 4 bytes - matches ObjectID type
+	StartTimestamp  uint32 // 4 bytes - matches Timestamp type
+	EndTimestamp    uint32 // 4 bytes - matches Timestamp type
+	NextBlockOffset int64  // 8 bytes
+	RecordCount     uint32 // 4 bytes
+	DataType        byte   // 1 byte - indicates value type
 }
 
 type OffsetTableEntry struct {
@@ -33,52 +30,51 @@ type OffsetTableEntry struct {
 }
 
 type IndexEntry struct {
-	DeviceID int `json:"device_id"`
-
-	Date string `json:"date"`
-
-	BlockOffset int64 `json:"block_offset"`
-
+	DeviceID      int   `json:"device_id"`
+	BlockOffset   int64 `json:"block_offset"`
 	CurrentOffset int64 `json:"current_offset"`
 }
 
 type BlockManager struct {
 	mu sync.Mutex
-
 	nextOffset map[int]int64
+	
+	// Track how many bytes are used in each block
+	blockUsage map[int]int
+	
+	// Track the current block offset for each device
+	currentBlock map[int]int64
 }
 
 func newBlockManager() *BlockManager {
-
 	return &BlockManager{
-
-		nextOffset: make(map[int]int64),
+		nextOffset:    make(map[int]int64),
+		blockUsage:    make(map[int]int),
+		currentBlock:  make(map[int]int64),
 	}
-
 }
 
 func (bm *BlockManager) getNextBlockOffset(deviceID int) int64 {
-
 	bm.mu.Lock()
-
 	defer bm.mu.Unlock()
 
 	if offset, exists := bm.nextOffset[deviceID]; exists {
-
-		// Increment by BlockSize for next time
-		bm.nextOffset[deviceID] = offset + BlockSize
-
+		nextOffset := offset + BlockSize
+		bm.nextOffset[deviceID] = nextOffset
 		return offset
-
 	}
 
-	// First block for this device
+	// First block for this device - check if we have a persisted offset
+	if offset, exists := bm.currentBlock[deviceID]; exists {
+		nextOffset := offset + BlockSize
+		bm.nextOffset[deviceID] = nextOffset
+		return offset
+	}
+
+	// Truly first block for this device
 	baseOffset := int64(0)
-
 	bm.nextOffset[deviceID] = baseOffset + BlockSize
-
 	return baseOffset
-
 }
 
 type StorageEngine struct {
@@ -100,14 +96,17 @@ type StorageEngine struct {
 }
 
 func NewStorageEngine() (*StorageEngine, error) {
-
-	return &StorageEngine{
-
-		mmapFiles: make(map[string]*MappedFile),
-
+	engine := &StorageEngine{
+		mmapFiles:    make(map[string]*MappedFile),
 		blockManager: newBlockManager(),
-	}, nil
-
+	}
+	
+	// Initialize block manager with persisted state
+	if err := engine.initializeBlockManagerState(); err != nil {
+		log.Printf("Warning: Failed to initialize block manager state: %v", err)
+	}
+	
+	return engine, nil
 }
 
 // sets the storage path for the engine
@@ -130,29 +129,20 @@ func (bs *StorageEngine) SetStoragePath(path string) error {
 }
 
 func (bs *StorageEngine) Put(key int, data []byte) error {
-
 	basePath := bs.getStoragePath()
-
 	if basePath == "" {
-
 		return fmt.Errorf("storage path not set")
-
 	}
 
 	partition := key % NumPartitions
-
 	partitionPath := filepath.Join(basePath, fmt.Sprintf("partition_%d", partition))
 
 	bs.partitionLocks[partition].Lock()
-
 	defer bs.partitionLocks[partition].Unlock()
 
 	if err := os.MkdirAll(partitionPath, 0755); err != nil {
-
 		log.Printf("failed to create directory structure: %v", err)
-
 		return err
-
 	}
 
 	// Get data file path
@@ -160,76 +150,104 @@ func (bs *StorageEngine) Put(key int, data []byte) error {
 
 	// Get or create memory-mapped file
 	mmapFile, err := bs.getMappedDataFile(dataFile)
-
 	if err != nil {
-
 		log.Printf("failed to get mapped file: %v", err)
-
 		return err
-
 	}
 
-	offset := bs.blockManager.getNextBlockOffset(key)
+	// Check if we can use existing block
+	var offset int64
+	var isNewBlock bool
+
+	if bs.hasSpaceInBlock(key, len(data)) {
+		// Use existing block
+		currentOffset, _ := bs.blockManager.currentBlock[key]
+		offset = currentOffset
+		isNewBlock = false
+	} else {
+		// Allocate new block
+		offset = bs.blockManager.getNextBlockOffset(key)
+		isNewBlock = true
+	}
 
 	requiredSize := offset + BlockSize
-
 	if requiredSize > int64(mmapFile.size) {
-
 		newSize := ((requiredSize / BlockSize) + 1) * BlockSize
-
 		if err := mmapFile.grow(int(newSize)); err != nil {
-
 			return fmt.Errorf("failed to extend mapping: %v", err)
+		}
+	}
 
+	// Extract timestamp from data
+	var timestamp uint32
+	if len(data) >= 4 {
+		timestamp = binary.LittleEndian.Uint32(data[:4])
+	}
+
+	if isNewBlock {
+		// Create new header for new block
+		header := bs.initializeBlockHeader(key, determineDataType(data), timestamp)
+		headerBytes := encodeBlockHeader(header)
+		if _, err := mmapFile.WriteAt(headerBytes, offset); err != nil {
+			return fmt.Errorf("failed to write header: %v", err)
 		}
 
+		// Update block manager state
+		bs.blockManager.mu.Lock()
+		bs.blockManager.currentBlock[key] = offset
+		bs.blockManager.blockUsage[key] = 0
+		bs.blockManager.mu.Unlock()
+	} else {
+		// Update existing header
+		if err := bs.updateBlockHeader(mmapFile, offset, data); err != nil {
+			return fmt.Errorf("failed to update header: %v", err)
+		}
 	}
 
-	// Create header
-	header := BlockHeader{
-
-		DeviceID: int32(key),
-
-		RecordCount: 1,
-	}
-
-	// Extract timestamp if available (first 8 bytes of data)
-	if len(data) >= 8 {
-
-		timestamp := int64(binary.LittleEndian.Uint64(data[:8]))
-
-		header.StartTimestamp = timestamp
-
-		header.EndTimestamp = timestamp
-
-	}
-
-	headerBytes := encodeBlockHeader(header)
-
-	// Write header
-	if _, err := mmapFile.WriteAt(headerBytes, offset); err != nil {
-
-		return fmt.Errorf("failed to write header: %v", err)
-
+	// Calculate write position
+	writeOffset := offset + BlockHeaderSize
+	if !isNewBlock {
+		usage, _ := bs.getBlockUsage(key, offset)
+		writeOffset += int64(usage)
 	}
 
 	// Write data
-	if _, err := mmapFile.WriteAt(data, offset+BlockHeaderSize); err != nil {
-
+	if _, err := mmapFile.WriteAt(data, writeOffset); err != nil {
 		return fmt.Errorf("failed to write data: %v", err)
-
 	}
+
+	// Update block usage
+	bs.blockManager.mu.Lock()
+	bs.blockManager.blockUsage[key] += len(data)
+	bs.blockManager.mu.Unlock()
 
 	// Update index
 	indexPath := filepath.Join(partitionPath, "index.json")
-
 	if err := bs.updateIndex(indexPath, key, offset); err != nil {
-
 		return fmt.Errorf("failed to update index: %v", err)
-
 	}
 
 	return nil
+}
+
+// Helper function to determine data type
+func determineDataType(data []byte) byte {
+	// Skip timestamp (first 4 bytes)
+	if len(data) < 12 { // Minimum size for data (timestamp + value)
+		return TypeInt // Default to int if data is too short
+	}
+
+	// Check value type based on data format
+	// This is a simplified example - adjust based on your actual data format
+	valueType := data[4] // Assuming you store type information after timestamp
+	switch valueType {
+	case TypeFloat:
+		return TypeFloat
+	case TypeString:
+		return TypeString
+	default:
+		return TypeInt
+	}
 }
 
 // retrieves data for a any device using the storage path
@@ -349,4 +367,69 @@ func (bs *StorageEngine) Close() error {
 	}
 
 	return nil
+}
+
+// Add new function to initialize block manager state
+func (bs *StorageEngine) initializeBlockManagerState() error {
+	basePath := bs.getStoragePath()
+	if basePath == "" {
+		return nil // No storage path set yet, skip initialization
+	}
+
+	// Scan through all partitions
+	for partition := 0; partition < NumPartitions; partition++ {
+		partitionPath := filepath.Join(basePath, fmt.Sprintf("partition_%d", partition))
+		indexPath := filepath.Join(partitionPath, "index.json")
+
+		// Read index file if it exists
+		index, err := bs.readIndex(indexPath)
+		if err != nil {
+			continue // Skip this partition if there's an error
+		}
+
+		// Update block manager state from index entries
+		for _, entry := range index {
+			deviceID := entry.DeviceID
+			bs.blockManager.mu.Lock()
+
+			// Update nextOffset if this block offset is higher than what we have
+			nextOffset := entry.BlockOffset + BlockSize
+			if currentNext, exists := bs.blockManager.nextOffset[deviceID]; !exists || nextOffset > currentNext {
+				bs.blockManager.nextOffset[deviceID] = nextOffset
+			}
+
+			// Set current block and usage if this is the current block
+			if entry.CurrentOffset != 0 {
+				bs.blockManager.currentBlock[deviceID] = entry.BlockOffset
+				// Read the block header to get current usage
+				if usage, err := bs.getBlockUsageFromHeader(entry.BlockOffset, partition); err == nil {
+					bs.blockManager.blockUsage[deviceID] = usage
+				}
+			}
+
+			bs.blockManager.mu.Unlock()
+		}
+	}
+	return nil
+}
+
+// Add helper function to get block usage from header
+func (bs *StorageEngine) getBlockUsageFromHeader(offset int64, partition int) (int, error) {
+	partitionPath := filepath.Join(bs.getStoragePath(), fmt.Sprintf("partition_%d", partition))
+	dataFile := filepath.Join(partitionPath, "data.bin")
+
+	mmapFile, err := bs.getMappedDataFile(dataFile)
+	if err != nil {
+		return 0, err
+	}
+
+	headerData := make([]byte, BlockHeaderSize)
+	if _, err := mmapFile.ReadAt(headerData, offset); err != nil {
+		return 0, err
+	}
+
+	header := decodeBlockHeader(headerData)
+	// Calculate usage based on record count and data type
+	// This is a simplified calculation - you might need to adjust based on your actual data structure
+	return int(header.RecordCount) * 12, nil // Assuming each record is 12 bytes (timestamp + value)
 }
