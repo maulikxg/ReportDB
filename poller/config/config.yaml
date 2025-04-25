@@ -1,4 +1,4 @@
-pollInterval: 30  # seconds
+pollInterval: 3  # seconds
 backendURL: "http://localhost:8080"
 sshTimeout: 10
 retryAttempts: 3

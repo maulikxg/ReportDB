@@ -18,14 +18,11 @@ type Config struct {
 }
 
 var DefaultConfig = Config{
-	PollInterval:  30,
+	PollInterval:  3,
 	SSHTimeout:    10,
 	RetryAttempts: 3,
 	MetricsToGet: []string{
 		"cpu",
 		"memory",
-		"disk",
-		"network",
-		"processes",
 	},
-} 
+}

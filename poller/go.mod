@@ -1,4 +1,4 @@
-module github.com/your-username/v1/poller
+module packxpoller
 
 go 1.21
 
