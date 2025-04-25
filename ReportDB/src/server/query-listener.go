@@ -5,12 +5,12 @@ import (
 	"errors"
 	zmq "github.com/pebbe/zmq4"
 	"log"
-	"packx/models"
+	. "packx/models"
 	"sync"
 	"time"
 )
 
-func InitQueryListener(queryReceiveChannel chan<- models.Query, globalShutdownWaitGroup *sync.WaitGroup) {
+func InitQueryListener(queryReceiveChannel chan<- Query, globalShutdownWaitGroup *sync.WaitGroup) {
 
 	defer globalShutdownWaitGroup.Done()
 
@@ -90,7 +90,7 @@ func InitQueryListener(queryReceiveChannel chan<- models.Query, globalShutdownWa
 					continue
 				}
 
-				var query models.Query
+				var query Query
 
 				if err = json.Unmarshal(queryBytes, &query); err != nil {
 

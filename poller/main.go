@@ -1,17 +1,14 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"log"
-	"net/http"
 	"packxpoller/collector"
 	"packxpoller/config"
 	. "packxpoller/utils"
 	"time"
 )
 
-func pollDevice(device config.Device, cfg *config.Config) {
+func pollDevice(device config.Device, cfg *config.Config, deviceIndex int) {
 
 	log.Printf("Attempting to connect to %s...", device.Host)
 
@@ -24,6 +21,7 @@ func pollDevice(device config.Device, cfg *config.Config) {
 		return
 
 	}
+
 	defer client.Close()
 
 	log.Printf("Successfully connected to %s", device.Host)
@@ -40,38 +38,16 @@ func pollDevice(device config.Device, cfg *config.Config) {
 
 	LogMetrics(metrics)
 
-	// Send metrics to backend
-	jsonData, err := json.Marshal(metrics)
+	// Send metrics to ReportDB via ZMQ
+	if err := SendMetrics(metrics, deviceIndex); err != nil {
 
-	if err != nil {
+		log.Printf("Failed to send metrics to ReportDB: %v", err)
 
-		log.Printf("Failed to marshal metrics for %s: %v", device.Host, err)
+	} else {
 
-		return
-
-	}
-
-	resp, err := http.Post(cfg.BackendURL+"/api/v1/metrics", "application/json", bytes.NewBuffer(jsonData))
-
-	if err != nil {
-
-		log.Printf("Failed to send metrics for %s: %v", device.Host, err)
-
-		return
+		log.Printf("Successfully sent metrics for %s to ReportDB", device.Host)
 
 	}
-
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-
-		log.Printf("Backend returned non-200 status for %s: %d", device.Host, resp.StatusCode)
-
-		return
-
-	}
-
-	log.Printf("Successfully sent metrics for %s to backend", device.Host)
 }
 
 func main() {
@@ -79,8 +55,20 @@ func main() {
 	cfg, err := InitConfig()
 
 	if err != nil {
+
 		log.Fatalf("Failed to load config: %v", err)
+
 	}
+
+	if err := InitZMQSender(); err != nil {
+
+		log.Fatalf("Failed to initialize ZMQ sender: %v", err)
+
+	}
+
+	defer CloseZMQSender()
+
+	log.Println("Starting poller with ZMQ connection to ReportDB...")
 
 	ticker := time.NewTicker(time.Duration(cfg.PollInterval) * time.Second)
 
@@ -88,9 +76,9 @@ func main() {
 
 	for {
 
-		for _, device := range cfg.Devices {
+		for i, device := range cfg.Devices {
 
-			go pollDevice(device, cfg)
+			go pollDevice(device, cfg, i)
 
 		}
 

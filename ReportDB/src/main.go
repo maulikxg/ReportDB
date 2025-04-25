@@ -5,13 +5,11 @@ import (
 	"log"
 	. "packx/DB"
 	. "packx/models"
-	"packx/polling"
-	"packx/server"
+	. "packx/server"
 
 	//	. "packx/server"
 	. "packx/utils"
 	"sync"
-	"time"
 )
 
 var pollData chan Metric
@@ -63,71 +61,71 @@ func main() {
 	globalShutDownWg.Add(4)
 
 	// Start the pull server
-	go server.PullServer(pollData)
+	go PullServer(pollData)
 
 	// Start polling
-	go polling.PollData(&wg)
+	//go PollData(&wg)
 
 	// Forward data from pollData to dataWriteCh
-	go func() {
-
-		defer globalShutDownWg.Done()
-
-		buffer := make([]Metric, 0, 10) // Buffer to accumulate metrics
-
-		ticker := time.NewTicker(1 * time.Second)
-
-		defer ticker.Stop()
-
-		for {
-
-			select {
-
-			case metric, ok := <-pollData:
-
-				if !ok {
-
-					// Channel closed, flush remaining buffer
-					if len(buffer) > 0 {
-
-						dataWriteCh <- buffer
-
-					}
-
-					return
-				}
-
-				buffer = append(buffer, metric)
-
-				if len(buffer) >= 10 { // Flush when buffer is full
-
-					dataWriteCh <- buffer
-
-					buffer = make([]Metric, 0, 10)
-
-				}
-
-			case <-ticker.C:
-
-				// Flush buffer periodically even if not full
-				if len(buffer) > 0 {
-
-					dataWriteCh <- buffer
-
-					buffer = make([]Metric, 0, 10)
-
-				}
-			}
-		}
-	}()
+	//go func() {
+	//
+	//	defer globalShutDownWg.Done()
+	//
+	//	buffer := make([]Metric, 0, 10) // Buffer to accumulate metrics
+	//
+	//	ticker := time.NewTicker(1 * time.Second)
+	//
+	//	defer ticker.Stop()
+	//
+	//	for {
+	//
+	//		select {
+	//
+	//		case metric, ok := <-pollData:
+	//
+	//			if !ok {
+	//
+	//				// Channel closed, flush remaining buffer
+	//				if len(buffer) > 0 {
+	//
+	//					dataWriteCh <- buffer
+	//
+	//				}
+	//
+	//				return
+	//			}
+	//
+	//			buffer = append(buffer, metric)
+	//
+	//			if len(buffer) >= 10 { // Flush when buffer is full
+	//
+	//				dataWriteCh <- buffer
+	//
+	//				buffer = make([]Metric, 0, 10)
+	//
+	//			}
+	//
+	//		case <-ticker.C:
+	//
+	//			// Flush buffer periodically even if not full
+	//			if len(buffer) > 0 {
+	//
+	//				dataWriteCh <- buffer
+	//
+	//				buffer = make([]Metric, 0, 10)
+	//
+	//			}
+	//		}
+	//	}
+	//}()
 
 	go InitDB(dataWriteCh, queryReceiveCh, queryResponseCh, &globalShutDownWg)
 
-	//go InitPollListener(dataWriteCh, &globalShutDownWg)
+	go InitPollListener(dataWriteCh, &globalShutDownWg)
 
-	go server.InitQueryListener(queryReceiveCh, &globalShutDownWg)
+	//go server.InitQueryListener(queryReceiveCh, &globalShutDownWg)
 
-	go server.InitQueryResponser(queryResponseCh, &globalShutDownWg)
+	go InitQueryResponser(queryResponseCh, &globalShutDownWg)
 
 	//queryReceiveCh <- query
 

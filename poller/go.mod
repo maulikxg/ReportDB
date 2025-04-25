@@ -3,6 +3,7 @@ module packxpoller
 go 1.21
 
 require (
+	github.com/pebbe/zmq4 v1.2.10
 	github.com/spf13/viper v1.18.2
 	golang.org/x/crypto v0.17.0
 )

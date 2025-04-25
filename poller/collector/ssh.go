@@ -9,10 +9,13 @@ import (
 )
 
 type Metrics struct {
-	Timestamp time.Time     `json:"timestamp"`
-	DeviceID  string        `json:"device_id"`
-	CPU       CPUMetrics    `json:"cpu"`
-	Memory    MemoryMetrics `json:"memory"`
+	Timestamp time.Time `json:"timestamp"`
+
+	DeviceID string `json:"device_id"`
+
+	CPU CPUMetrics `json:"cpu"`
+
+	Memory MemoryMetrics `json:"memory"`
 }
 
 type CPUMetrics struct {
@@ -72,7 +75,7 @@ func CollectMetrics(client *ssh.Client, deviceID string) (*Metrics, error) {
 	} else {
 
 		fmt.Printf("Error running memory command: %v\n", err)
-		
+
 	}
 
 	return metrics, nil
