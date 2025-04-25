@@ -1,0 +1,14 @@
+{
+  "1" : {
+    "name" : "type1",
+    "type" : "int64"
+  },
+  "2": {
+    "name": "type2",
+    "type" : "float64"
+  },
+  "3": {
+    "name" : "type3",
+    "type" : "string"
+  }
+}
