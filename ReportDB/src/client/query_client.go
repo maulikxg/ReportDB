@@ -21,7 +21,7 @@ type QueryClient struct {
 // NewQueryClient creates a new query client
 func NewQueryClient() (*QueryClient, error) {
 	log.Println("Initializing query client...")
-	
+
 	context, err := zmq.NewContext()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create ZMQ context: %v", err)
@@ -95,7 +95,7 @@ func (c *QueryClient) SendQuery(query models.Query) (*models.QueryResponse, erro
 			log.Printf("Received matching response for query ID: %d", query.QueryID)
 			return &response, nil
 		}
-		return nil, fmt.Errorf("received response for different query (expected: %d, got: %d)", 
+		return nil, fmt.Errorf("received response for different query (expected: %d, got: %d)",
 			query.QueryID, response.QueryID)
 	case <-time.After(10 * time.Second):
 		return nil, fmt.Errorf("timeout waiting for response to query ID: %d", query.QueryID)
@@ -134,10 +134,10 @@ func (c *QueryClient) receiveResponses() {
 			}
 
 			log.Printf("[Receiver] Raw response received and unmarshalled for QueryID: %d", response.QueryID)
-			log.Printf("[Receiver] Response for query ID: %d contains data for %d object(s)", 
+			log.Printf("[Receiver] Response for query ID: %d contains data for %d object(s)",
 				response.QueryID, len(response.Data))
-			
-			// Attempt to send to the responses channel. 
+
+			// Attempt to send to the responses channel.
 			// This might block if SendQuery isn't ready, but that's expected for this simple sync design.
 			trySendResponse(c.responses, response)
 		}
@@ -158,14 +158,14 @@ func trySendResponse(ch chan<- models.QueryResponse, resp models.QueryResponse) 
 	case <-time.After(1 * time.Second):
 		log.Printf("[Receiver] Timeout sending response for QueryID %d to channel. No SendQuery waiting?", resp.QueryID)
 	}
-	
+
 }
 
 // Close closes the client connection
 func (c *QueryClient) Close() error {
 	log.Println("Closing query client...")
 	close(c.done)
-	
+
 	if err := c.sendSocket.Close(); err != nil {
 		log.Printf("Error closing send socket: %v", err)
 	}
@@ -205,4 +205,4 @@ func ExampleUsage() {
 	}
 
 	log.Printf("Received response: %+v", response)
-} 
+}

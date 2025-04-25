@@ -197,6 +197,85 @@ func main() {
 
 	}
 
+	histogramQuery := models.Query{
+
+		QueryID: uint64(time.Now().UnixNano()) + 2,
+
+		From: fiveMinutesAgo,
+
+		To: currentTime,
+
+		ObjectIDs: []uint32{0, 1},
+
+		CounterId: 1,
+
+		Aggregation: "histogram",
+	}
+
+	log.Printf("\nSending HISTOGRAM query: %+v", histogramQuery)
+
+	histResponse, err := cli.SendQuery(histogramQuery)
+
+	if err != nil {
+
+		log.Printf("Error sending histogram query: %v", err)
+
+	} else {
+
+		fmt.Println("\nHISTOGRAM RESPONSE:")
+
+		fmt.Println("===================")
+
+		for objID, dataPoints := range histResponse.Data {
+
+			fmt.Printf("\nObject ID: %d (Bucket count: %d)\n", objID, len(dataPoints))
+
+			if len(dataPoints) == 0 {
+
+				fmt.Println("  NO HISTOGRAM DATA FOUND")
+
+				continue
+
+			}
+
+			fmt.Println("\nBucket Start Time      | Unix Time | Count")
+
+			fmt.Println("----------------------|-----------|-------")
+
+			for _, dp := range dataPoints {
+
+				timeStr := time.Unix(int64(dp.Timestamp), 0).Format("2006-01-02 15:04:05")
+
+				var countValue int
+
+				switch v := dp.Value.(type) {
+
+				case int:
+
+					countValue = v
+
+				case float64:
+
+					countValue = int(v)
+
+				default:
+
+					countValue = 0
+
+					fmt.Printf("%-22s | %-9d | %d (original type: %T)\n",
+						timeStr, dp.Timestamp, countValue, dp.Value)
+
+					continue
+
+				}
+
+				fmt.Printf("%-22s | %-9d | %d\n", timeStr, dp.Timestamp, countValue)
+			}
+
+			fmt.Println("===================")
+		}
+	}
+
 	log.Println("Query testing finished. Closing client shortly...")
 
 	time.Sleep(1 * time.Second)
