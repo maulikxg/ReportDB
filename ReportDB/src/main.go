@@ -123,7 +123,7 @@ func main() {
 
 	go InitPollListener(dataWriteCh, &globalShutDownWg)
 
-	//go server.InitQueryListener(queryReceiveCh, &globalShutDownWg)
+	go InitQueryListener(queryReceiveCh, &globalShutDownWg)
 
 	go InitQueryResponser(queryResponseCh, &globalShutDownWg)
 
