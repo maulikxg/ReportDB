@@ -8,13 +8,19 @@ type Device struct {
 	SSHKey   string
 }
 
+type ZMQConfig struct {
+	BackendMetrics string `yaml:"backend_metrics"`
+	ConfigEndpoint string `yaml:"config_endpoint"`
+}
+
 type Config struct {
+	ZMQ           ZMQConfig `yaml:"zmq"`
 	Devices       []Device
-	PollInterval  int    // in seconds
-	BackendURL    string // URL to send metrics to
+	PollInterval  int    `yaml:"pollinterval"` // in seconds
+	BackendURL    string `yaml:"backendurl"`   // URL to send metrics to
 	MetricsToGet  []string
-	SSHTimeout    int // in seconds
-	RetryAttempts int
+	SSHTimeout    int `yaml:"sshtimeout"`    // in seconds
+	RetryAttempts int `yaml:"retryattempts"`
 }
 
 var DefaultConfig = Config{
@@ -24,5 +30,9 @@ var DefaultConfig = Config{
 	MetricsToGet: []string{
 		"cpu",
 		"memory",
+	},
+	ZMQ: ZMQConfig{
+		BackendMetrics: "tcp://localhost:5556",
+		ConfigEndpoint: "tcp://*:5557",
 	},
 }

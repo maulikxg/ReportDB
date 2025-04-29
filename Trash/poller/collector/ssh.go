@@ -56,8 +56,7 @@ func CollectMetrics(client *ssh.Client, deviceID string) (*Metrics, error) {
 	}
 
 	// Collect used memory
-	//memOut, err := runCommand(client, "free -b | grep Mem | awk '{print $3}'")
-	memOut, err := runCommand(client, "free -m | grep Mem | awk '{print $3}'")
+	memOut, err := runCommand(client, "free -b | grep Mem | awk '{print $3}'")
 
 	if err == nil {
 

@@ -1,17 +1,23 @@
-pollInterval: 3  # seconds
-backendURL: "http://localhost:8080"
-sshTimeout: 10
-retryAttempts: 3
-
+zmq:
+  backend_metrics: tcp://localhost:5556
+  config_endpoint: tcp://*:5557
+backendurl: http://localhost:8081
 devices:
-  - host: "localhost"  # For testing, we'll monitor the local machine
-    port: 22
-    username: "maulikpuri"  # Your username
-    password: "Mind@123"  # Leave empty if using SSH key
-    sshKey: "/home/maulikpuri/.ssh/id_rsa"  # Absolute path to your SSH key
-
-  # Add more devices as needed:
-  # - host: "192.168.1.101"
-  #   port: 22
-  #   username: "monitor"
-  #   password: "secret" 
+    - host: localhost
+      port: 22
+      username: maulikpuri
+      password: Mind@123
+      sshkey: /home/maulikpuri/.ssh/id_rsa
+    - host: 10.20.40.103
+      port: 8008
+      username: dhyanesh
+      password: Mind@123
+      sshkey: ""
+    - host: 10.20.40.107
+      port: 22
+      username: harekrushn
+      password: Mind@123
+      sshkey: ""
+pollinterval: 3
+retryattempts: 3
+sshtimeout: 10

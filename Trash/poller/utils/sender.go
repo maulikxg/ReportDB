@@ -43,18 +43,18 @@ func InitZMQSender() error {
 
 	}
 
-	// Connect to Backend's metrics receiver PULL server
-	if err := pushSocket.Connect("tcp://localhost:5558"); err != nil {
+	// Connect to ReportDB's PULL server
+	if err := pushSocket.Connect("tcp://localhost:5556"); err != nil {
 
 		pushSocket.Close()
 
 		zmqContext.Term()
 
-		return fmt.Errorf("failed to connect to backend metrics receiver: %v", err)
+		return fmt.Errorf("failed to connect to ReportDB: %v", err)
 
 	}
 
-	log.Println("ZMQ sender initialized and connected to backend metrics receiver at tcp://localhost:5558")
+	log.Println("ZMQ sender initialized and connected to ReportDB at tcp://localhost:5556")
 
 	return nil
 }
@@ -76,15 +76,10 @@ func CloseZMQSender() {
 
 func SendMetrics(metrics *collector.Metrics, deviceIndex int) error {
 
-	// Ensure we have a valid objectID
-	objectID := uint32(deviceIndex)
-	
-	// Log the device ID we're using
-	log.Printf("Using ObjectID %d for device %s", objectID, metrics.DeviceID)
-
 	// Send CPU metrics
 	cpuMetric := Metric{
-		ObjectID:  objectID,
+
+		ObjectID:  uint32(deviceIndex),
 		CounterId: 1, // Using 1 for CPU metrics
 		Value:     metrics.CPU.Usage,
 		Timestamp: uint32(time.Now().Unix()),
@@ -96,8 +91,8 @@ func SendMetrics(metrics *collector.Metrics, deviceIndex int) error {
 
 	// Send memory metrics
 	memMetric := Metric{
-		ObjectID:  objectID, 
-		CounterId: 2,       // Using 2 for memory metrics
+		ObjectID:  uint32(deviceIndex), // Using device index as ObjectID
+		CounterId: 2,                   // Using 2 for memory metrics
 		Value:     metrics.Memory.Used,
 		Timestamp: uint32(time.Now().Unix()),
 	}

@@ -98,6 +98,15 @@ func Reader(queryReceiveCh <-chan models.Query, queryResultCh chan<- models.Quer
 
 				response.Data[objectID] = histogramPoints
 
+			} else if query.Aggregation == "gauge" {
+                
+				// Generate gauge data with 30-second intervals
+				gaugePoints := generateGauge(allDataPoints, 30) // 30-second intervals
+
+				log.Printf("Generated gauge data with %d points for ObjectID %d", len(gaugePoints), objectID)
+
+				response.Data[objectID] = gaugePoints
+
 			} else if query.Aggregation != "" && len(allDataPoints) > 0 {
 
 				aggregatedPoints := aggregateDataPoints(allDataPoints, query.Aggregation)

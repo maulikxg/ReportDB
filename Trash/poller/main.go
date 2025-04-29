@@ -60,7 +60,6 @@ func main() {
 
 	}
 
-	// Initialize ZMQ sender for metrics
 	if err := InitZMQSender(); err != nil {
 
 		log.Fatalf("Failed to initialize ZMQ sender: %v", err)
@@ -69,39 +68,13 @@ func main() {
 
 	defer CloseZMQSender()
 
-	// Initialize ZMQ receiver for configuration updates
-	if err := InitConfigReceiver(); err != nil {
-
-		log.Fatalf("Failed to initialize config receiver: %v", err)
-
-	}
-
-	defer CloseConfigReceiver()
-
-	// Start the config receiver goroutine
-	StartConfigReceiver()
-
 	log.Println("Starting poller with ZMQ connection to ReportDB...")
-
-	log.Println("Listening for configuration updates on tcp://*:5557")
 
 	ticker := time.NewTicker(time.Duration(cfg.PollInterval) * time.Second)
 
 	defer ticker.Stop()
 
 	for {
-		// Reload config each time to get the latest devices list
-		newCfg, err := InitConfig()
-
-		if err != nil {
-
-			log.Printf("Error reloading config: %v", err)
-
-		} else {
-
-			cfg = newCfg
-
-		}
 
 		for i, device := range cfg.Devices {
 

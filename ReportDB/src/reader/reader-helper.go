@@ -107,7 +107,7 @@ func deserializeDataBlock(blockData []byte, fromTime uint32, toTime uint32, data
 		if timestamp < fromTime || timestamp > toTime {
 
 			switch dataType {
-			
+
 			case utils.TypeInt:
 
 				offset += 8
@@ -370,4 +370,83 @@ func aggregateDataPoints(points []models.DataPoint, aggregation string) []models
 	}
 
 	return points
+}
+
+// generateGauge processes data points to create gauge visualization data
+// It returns the latest value for each interval (default: 30 seconds)
+func generateGauge(dataPoints []models.DataPoint, intervalSeconds int) []models.DataPoint {
+
+	if len(dataPoints) == 0 {
+		return []models.DataPoint{}
+	}
+
+	// If no interval specified, default to 30 seconds
+	if intervalSeconds <= 0 {
+
+		intervalSeconds = 30
+
+	}
+
+	// map to store latest values in each interval
+	gaugePoints := make(map[uint32]models.DataPoint)
+
+	// Determine min and max times
+	minTime := dataPoints[0].Timestamp
+
+	maxTime := dataPoints[0].Timestamp
+
+	for _, dp := range dataPoints {
+
+		if dp.Timestamp < minTime {
+
+			minTime = dp.Timestamp
+
+		}
+
+		if dp.Timestamp > maxTime {
+
+			maxTime = dp.Timestamp
+
+		}
+	}
+
+	intervalSize := uint32(intervalSeconds)
+
+	for _, dp := range dataPoints {
+
+		intervalStart := dp.Timestamp - (dp.Timestamp % intervalSize)
+
+		existingPoint, exists := gaugePoints[intervalStart]
+
+		if !exists || existingPoint.Timestamp < dp.Timestamp {
+
+			gaugePoints[intervalStart] = dp
+
+		}
+
+	}
+
+	// Convert to slice
+	result := make([]models.DataPoint, 0, len(gaugePoints))
+
+	for _, point := range gaugePoints {
+
+		result = append(result, point)
+
+	}
+
+	// Sort by timestamp
+	for i := 0; i < len(result); i++ {
+
+		for j := i + 1; j < len(result); j++ {
+
+			if result[i].Timestamp > result[j].Timestamp {
+
+				result[i], result[j] = result[j], result[i]
+
+			}
+		}
+	}
+
+	return result
 }
