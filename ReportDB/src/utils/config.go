@@ -238,10 +238,10 @@ func GetCounterType(counterID uint16) (byte, error) {
 	switch counterID {
 
 	case 1:
-		return TypeInt, nil
+		return TypeFloat, nil
 
 	case 2:
-		return TypeFloat, nil
+		return TypeInt, nil
 
 	case 3:
 		return TypeString, nil

@@ -82,11 +82,11 @@ func SendMetrics(metrics *collector.Metrics, deviceIndex int) error {
 	// Log the device ID we're using
 	log.Printf("Using ObjectID %d for device %s", objectID, metrics.DeviceID)
 
-	// Send CPU metrics
+	// Send CPU metrics (CounterId 1 expects float)
 	cpuMetric := Metric{
 		ObjectID:  objectID,
-		CounterId: 1, // Using 1 for CPU metrics
-		Value:     metrics.CPU.Usage,
+		CounterId: 1, // Using 1 for CPU metrics (expects float)
+		Value:     float64(metrics.CPU.Usage), // Explicitly cast to float64 to ensure correct type
 		Timestamp: uint32(time.Now().Unix()),
 	}
 
@@ -94,11 +94,11 @@ func SendMetrics(metrics *collector.Metrics, deviceIndex int) error {
 		return fmt.Errorf("failed to send CPU metric: %v", err)
 	}
 
-	// Send memory metrics
+	// Send memory metrics (CounterId 2 expects int)
 	memMetric := Metric{
 		ObjectID:  objectID, 
-		CounterId: 2,       // Using 2 for memory metrics
-		Value:     metrics.Memory.Used,
+		CounterId: 2,       // Using 2 for memory metrics (expects int)
+		Value:     int64(metrics.Memory.Used), // Cast uint64 to int64 to match expected type
 		Timestamp: uint32(time.Now().Unix()),
 	}
 

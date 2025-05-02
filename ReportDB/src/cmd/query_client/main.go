@@ -35,7 +35,7 @@ func main() {
 		From:        fiveMinutesAgo,
 		To:          currentTime,
 		ObjectIDs:   []uint32{0, 1, 2},
-		CounterId:   1,
+		CounterId:   2,
 		Aggregation: "", // Request raw data points (no aggregation)
 	}
 

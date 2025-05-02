@@ -299,25 +299,24 @@ func (bs *StorageEngine) Put(key int, data []byte) error {
 }
 
 func determineDataType(data []byte) byte {
-
 	// Skip timestamp (first 4 bytes)
-	if len(data) < 12 { // Minimum size for data (timestamp + value)
+	if len(data) < 5 { // Must at least contain timestamp + type marker
 		return TypeInt // Default to int if data is too short
 	}
 
-	valueType := data[4]
+	// Type marker is the 5th byte (at index 4) right after the timestamp
+	typeMarker := data[4]
 
-	switch valueType {
-
+	switch typeMarker {
 	case TypeFloat:
 		return TypeFloat
-
+	case TypeInt:
+		return TypeInt
 	case TypeString:
 		return TypeString
-
 	default:
+		// If we get an invalid type marker, default to int
 		return TypeInt
-
 	}
 }
 

@@ -120,7 +120,7 @@ func PollCPUData(pollData chan<- models.Metric) {
 
 				CounterId: 1, // Counter ID for CPU
 
-				Value: cpuValue,
+				Value: float64(cpuValue), // Explicitly cast to float64 to ensure correct type
 
 				Timestamp: uint32(time.Now().Unix()),
 			}

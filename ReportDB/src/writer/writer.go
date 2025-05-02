@@ -105,6 +105,17 @@ func serializeMetric(metric models.Metric) ([]byte, error) {
 		return nil, fmt.Errorf("failed to write Timestamp: %v", err)
 	}
 
+	// Get expected type for this counter
+	expectedType, err := utils.GetCounterType(metric.CounterId)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get counter type: %v", err)
+	}
+
+	// Write data type marker right after timestamp
+	if err := buf.WriteByte(expectedType); err != nil {
+		return nil, fmt.Errorf("failed to write type marker: %v", err)
+	}
+
 	// Write the value based on its type
 	switch v := metric.Value.(type) {
 	case int, int32, int64:

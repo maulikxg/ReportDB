@@ -32,55 +32,37 @@ func CollectMetrics(client *ssh.Client, deviceID string) (*Metrics, error) {
 		DeviceID:  deviceID,
 	}
 
-	// Collect CPU usage
-	cpuOut, err := runCommand(client, "mpstat 1 1 | tail -n 1 | awk '{print 100 - $NF}'")
-
+	// Get CPU usage from top
+	cpuCmd := `top -bn1 | awk 'NR==3 {print $2}'`
+	cpuOut, err := runCommand(client, cpuCmd)
 	if err == nil {
-
-		cpuUsage, err := strconv.ParseFloat(strings.TrimSpace(cpuOut), 64)
-
-		if err == nil {
-
+		if cpuUsage, err := strconv.ParseFloat(strings.TrimSpace(cpuOut), 64); err == nil {
 			metrics.CPU.Usage = cpuUsage
-
 		} else {
-
 			fmt.Printf("Error parsing CPU usage: %v\n", err)
-
+			metrics.CPU.Usage = 0.0
 		}
-
 	} else {
-
 		fmt.Printf("Error running CPU command: %v\n", err)
-
+		metrics.CPU.Usage = 0.0
 	}
 
-	// Collect used memory
-	//memOut, err := runCommand(client, "free -b | grep Mem | awk '{print $3}'")
-	memOut, err := runCommand(client, "free -m | grep Mem | awk '{print $3}'")
-
+	// Get memory usage in MB using free command
+	memCmd := `free -m | awk 'NR==2 {print $3}'`  // Column 3 is used memory in MB
+	memOut, err := runCommand(client, memCmd)
 	if err == nil {
-
-		usedMem, err := strconv.ParseUint(strings.TrimSpace(memOut), 10, 64)
-
-		if err == nil {
-
-			metrics.Memory.Used = usedMem
-
+		if memUsed, err := strconv.ParseUint(strings.TrimSpace(memOut), 10, 64); err == nil {
+			metrics.Memory.Used = memUsed  // This is now in MB
 		} else {
-
-			fmt.Printf("Error parsing used memory: %v\n", err)
-
+			fmt.Printf("Error parsing memory usage: %v\n", err)
+			metrics.Memory.Used = 0
 		}
-
 	} else {
-
 		fmt.Printf("Error running memory command: %v\n", err)
-
+		metrics.Memory.Used = 0
 	}
 
 	return metrics, nil
-
 }
 
 func runCommand(client *ssh.Client, cmd string) (string, error) {

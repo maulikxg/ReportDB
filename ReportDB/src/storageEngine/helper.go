@@ -257,45 +257,32 @@ func updateCurrentBlockOffset(index []IndexEntry, deviceID int, offset int64) []
 }
 
 func (bs *StorageEngine) getMappedDataFile(path string) (*MappedFile, error) {
-
 	bs.mmapFilesLock.Lock()
-
 	defer bs.mmapFilesLock.Unlock()
 
 	if mmap, exists := bs.mmapFiles[path]; exists {
-
 		return mmap, nil
-
 	}
 
 	dir := filepath.Dir(path)
-
 	if err := os.MkdirAll(dir, 0755); err != nil {
-
 		return nil, fmt.Errorf("failed to create directory for data file: %v", err)
-
 	}
 
 	initialSize := BlockSize * 1024 // Initial size for the mmaping the file
 
 	fileInfo, err := os.Stat(path)
-
 	if err == nil && fileInfo.Size() > int64(initialSize) {
-
 		initialSize = int(fileInfo.Size()) + BlockSize*1024
-
 	}
 
 	mmap, err := openMappedFile(path, initialSize)
-
 	if err != nil {
 		return nil, fmt.Errorf("failed to open data file: %v", err)
 	}
 
 	bs.mmapFiles[path] = mmap
-
 	return mmap, nil
-
 }
 
 func encodeBlockHeader(header BlockHeader) []byte {
@@ -328,17 +315,11 @@ func decodeBlockHeader(data []byte) BlockHeader {
 }
 
 func encodeOffsetTableEntry(entry OffsetTableEntry) []byte {
-
 	buf := make([]byte, OffsetTableEntrySize)
-
 	binary.LittleEndian.PutUint64(buf[0:8], uint64(entry.Timestamp))
-
 	binary.LittleEndian.PutUint16(buf[8:10], entry.Offset)
-
 	binary.LittleEndian.PutUint16(buf[10:12], entry.Length)
-
 	buf[12] = entry.Type
-
 	return buf
 }
 
@@ -385,78 +366,54 @@ func decodeOffsetTableEntry(data []byte) OffsetTableEntry {
 
 // Update getBlockUsage to use proper BlockManager fields
 func (bs *StorageEngine) getBlockUsage(deviceID int, blockOffset int64) (int, error) {
-
 	bs.blockManager.mu.Lock()
-
 	defer bs.blockManager.mu.Unlock()
 
 	if currentOffset, exists := bs.blockManager.currentBlock[deviceID]; exists && blockOffset == currentOffset {
-
 		if usage, exists := bs.blockManager.blockUsage[deviceID]; exists {
 			return usage, nil
 		}
-
 	}
 
 	return BlockSize - BlockHeaderSize, nil
 }
 
 func (bs *StorageEngine) hasSpaceInBlock(deviceID int, dataSize int) bool {
-
 	bs.blockManager.mu.Lock()
-
 	defer bs.blockManager.mu.Unlock()
 
 	if _, exists := bs.blockManager.currentBlock[deviceID]; exists {
-
 		if usage, exists := bs.blockManager.blockUsage[deviceID]; exists {
-
 			return usage+dataSize <= BlockSize-BlockHeaderSize
-
 		}
-
 	}
-
 	return false
 }
 
 // Update updateBlockHeader to use proper BlockManager fields
 func (bs *StorageEngine) updateBlockHeader(mmapFile *MappedFile, offset int64, newData []byte) error {
-
 	headerData := make([]byte, BlockHeaderSize)
-
 	if _, err := mmapFile.ReadAt(headerData, offset); err != nil {
 		return fmt.Errorf("failed to read header: %v", err)
 	}
 
 	header := decodeBlockHeader(headerData)
-
 	header.RecordCount++
 
 	// Update timestamps if data contains timestamp
 	if len(newData) >= 4 {
-
 		timestamp := binary.LittleEndian.Uint32(newData[:4])
-
 		if timestamp > header.EndTimestamp {
-
 			header.EndTimestamp = timestamp
-
 		}
-
 		if header.StartTimestamp == 0 {
-
 			header.StartTimestamp = timestamp
-
 		}
 	}
 
 	headerBytes := encodeBlockHeader(header)
-
 	if _, err := mmapFile.WriteAt(headerBytes, offset); err != nil {
-
 		return fmt.Errorf("failed to update header: %v", err)
-
 	}
 
 	return nil

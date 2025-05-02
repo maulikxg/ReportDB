@@ -93,7 +93,7 @@ func SendMetrics(metrics *collector.Metrics, deviceIndex int) error {
 	memMetric := Metric{
 		ObjectID:  uint32(deviceIndex), // Using device index as ObjectID
 		CounterId: 2,                   // Using 2 for memory metrics
-		Value:     metrics.Memory.Used,
+		Value:     int64(metrics.Memory.Used),
 		Timestamp: uint32(time.Now().Unix()),
 	}
 

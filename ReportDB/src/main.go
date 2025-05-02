@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
+	_ "net/http/pprof"
 	. "packx/DB"
 	. "packx/models"
 	. "packx/server"
@@ -57,7 +59,7 @@ func main() {
 	queryResponseCh := make(chan QueryResponse, GetBufferredChanSize())
 
 	var globalShutDownWg sync.WaitGroup
- 
+
 	globalShutDownWg.Add(4)
 
 	// Start the pull server
@@ -126,11 +128,22 @@ func main() {
 	go InitQueryListener(queryReceiveCh, &globalShutDownWg)
 
 	go InitQueryResponser(queryResponseCh, &globalShutDownWg)
-
+	go InitProfiling()
 	//queryReceiveCh <- query
 
 	// Wait for all goroutines to finish
 	globalShutDownWg.Wait()
 
 	select {}
+}
+
+func InitProfiling() {
+
+	err := http.ListenAndServe("localhost:1234", nil)
+
+	if err != nil {
+
+		log.Println("Error starting profiling:", err)
+
+	}
 }

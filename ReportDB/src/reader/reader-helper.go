@@ -88,88 +88,66 @@ func generateHistogram(dataPoints []models.DataPoint, bucketSizeSeconds int) []m
 }
 
 func deserializeDataBlock(blockData []byte, fromTime uint32, toTime uint32, dataType byte) ([]models.DataPoint, error) {
-
 	var dataPoints []models.DataPoint
 
 	// Process data starting from offset 0 (header is not included in the data)
 	offset := 0
 
 	for offset < len(blockData) {
-
 		if offset+4 > len(blockData) {
 			break
 		}
 
+		// Read timestamp (first 4 bytes)
 		timestamp := binary.LittleEndian.Uint32(blockData[offset : offset+4])
-
 		offset += 4
 
+		// Skip the type marker byte (we already know the expected type)
+		if offset < len(blockData) {
+			offset += 1 // Skip the type marker byte
+		} else {
+			break
+		}
+
 		if timestamp < fromTime || timestamp > toTime {
-
+			// Skip this data point since it's outside our time range
 			switch dataType {
-
 			case utils.TypeInt:
-
 				offset += 8
-
 			case utils.TypeFloat:
-
 				offset += 8
-
 			case utils.TypeString:
-
 				if offset+4 > len(blockData) {
-
 					return dataPoints, fmt.Errorf("invalid string format: insufficient data for length")
-
 				}
-
 				strLen := binary.LittleEndian.Uint32(blockData[offset : offset+4])
-
 				offset += 4 + int(strLen)
-
 			default:
-
 				return dataPoints, fmt.Errorf("unknown data type: %d", dataType)
-
 			}
-
 			continue
 		}
 
 		// Read the actual value based on data type
 		var value interface{}
-
 		var valueErr error
 
 		switch dataType {
-
 		case utils.TypeInt:
-
 			value, offset, valueErr = readIntValue(blockData, offset)
-
 		case utils.TypeFloat:
-
 			value, offset, valueErr = readFloatValue(blockData, offset)
-
 		case utils.TypeString:
-
 			value, offset, valueErr = readStringValue(blockData, offset)
-
 		default:
-
 			return dataPoints, fmt.Errorf("unknown data type: %d", dataType)
-
 		}
 
 		if valueErr != nil {
-
 			return dataPoints, valueErr
-
 		}
 
 		dataPoints = append(dataPoints, models.DataPoint{
-
 			Timestamp: timestamp,
 			Value:     value,
 		})

@@ -82,7 +82,7 @@ func LogMetrics(metrics *collector.Metrics) {
 	log.Printf("CPU: Usage=%.2f%%", metrics.CPU.Usage)
 
 	// Memory Metrics
-	log.Printf("Memory: Used=%d MB", metrics.Memory.Used/1024/1024)
+	log.Printf("Memory: Used=%d MB", metrics.Memory.Used)
 
 	log.Println("=== End of Metrics ===")
 }
