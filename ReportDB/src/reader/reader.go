@@ -3,17 +3,30 @@ package reader
 import (
 	"fmt"
 	"log"
+	"math"
+	"os"
 	"packx/models"
 	"packx/storageEngine"
 	"packx/utils"
 	"path/filepath"
+	"sort"
 	"sync"
 	"time"
 )
 
-func Reader(queryReceiveCh <-chan models.Query, queryResultCh chan<- models.QueryResponse, shutDownWg *sync.WaitGroup) {
+const (
+	DefaultHistogramInterval = 10 // Default 10-second interval for histograms
+)
 
-	defer shutDownWg.Done()
+// processQuery handles a single query with parallel processing for multiple objects
+func processQuery(query models.Query) models.QueryResponse {
+
+	response := models.QueryResponse{
+
+		QueryID: query.QueryID,
+
+		Data: make(map[uint32][]models.DataPoint),
+	}
 
 	storage, err := storageEngine.NewStorageEngine()
 
@@ -21,115 +34,404 @@ func Reader(queryReceiveCh <-chan models.Query, queryResultCh chan<- models.Quer
 
 		log.Printf("Failed to create storage engine: %v", err)
 
-		return
+		return response
 
 	}
 
-	for query := range queryReceiveCh {
+	// If ObjectIDs is empty, get all device IDs
 
-		log.Printf("Reader processing query: %+v", query)
+	var objectIDs []uint32
 
-		// Initialize response
-		response := models.QueryResponse{
+	if len(query.ObjectIDs) == 0 {
 
-			QueryID: query.QueryID,
+		log.Printf("Processing all-devices query for counter %d from %d to %d",
+			query.CounterId, query.From, query.To)
 
-			Data: make(map[uint32][]models.DataPoint),
-		}
+		startTime := time.Now()
 
-		// Process each ObjectID in the query
-		for _, objectID := range query.ObjectIDs {
+		// Get all device IDs from the storage engine
+		fromTime := time.Unix(int64(query.From), 0)
 
-			log.Printf("Processing ObjectID: %d", objectID)
+		toTime := time.Unix(int64(query.To), 0)
 
-			// Calculate time range for the query
-			fromTime := time.Unix(int64(query.From), 0)
+		// Create a map for uniqueness
+		deviceIDsMap := make(map[uint32]bool)
 
-			toTime := time.Unix(int64(query.To), 0)
+		// Scan all days in the time range for the specified counter
+		for day := fromTime; !day.After(toTime); day = day.AddDate(0, 0, 1) {
 
-			var allDataPoints []models.DataPoint
+			dateStr := day.Format("2006/01/02")
 
-			// Iterate through each day in the time range
-			for d := fromTime; !d.After(toTime); d = d.AddDate(0, 0, 1) {
+			counterPath := filepath.Join(
 
-				dateStr := d.Format("2006/01/02")
+				utils.GetStoragePath(),
 
-				counterPath := filepath.Join(
-					utils.GetStoragePath(),
-					dateStr,
-					fmt.Sprintf("counter_%d", query.CounterId),
-				)
+				dateStr,
 
-				// Set storage path for this read operation
-				if err := storage.SetStoragePath(counterPath); err != nil {
+				fmt.Sprintf("counter_%d", query.CounterId),
+			)
 
-					log.Printf("Error setting storage path for date %s: %v", dateStr, err)
+			if _, err := os.Stat(counterPath); os.IsNotExist(err) {
 
-					continue
-
-				}
-
-				// Process data for this object on this day
-				dataPoints, err := readDataForObject(storage, int(objectID), query.From, query.To, query.CounterId)
-
-				if err != nil {
-
-					log.Printf("Error reading data for ObjectID %d on %s: %v", objectID, dateStr, err)
-
-					continue
-
-				}
-
-				allDataPoints = append(allDataPoints, dataPoints...)
-
-				log.Printf("Found %d data points for ObjectID %d on %s", len(dataPoints), objectID, dateStr)
+				continue
 
 			}
 
-			log.Printf("Found total %d data points for ObjectID %d", len(allDataPoints), objectID)
+			if err := storage.SetStoragePath(counterPath); err != nil {
 
-			// Apply aggregation if specified
-			if query.Aggregation == "histogram" {
+				log.Printf("Error setting storage path for date %s: %v", dateStr, err)
 
-				// Generate histogram with 10-second buckets
-				histogramPoints := generateHistogram(allDataPoints, 10) // 10-second buckets
+				continue
+			}
 
-				log.Printf("Generated histogram with %d buckets for ObjectID %d", len(histogramPoints), objectID)
+			// Get device IDs for this day
+			dayDeviceIDs, err := storage.GetAllDeviceIDs()
 
-				response.Data[objectID] = histogramPoints
+			if err != nil {
 
-			} else if query.Aggregation == "gauge" {
-                
-				// Generate gauge data with 30-second intervals
-				gaugePoints := generateGauge(allDataPoints, 30) // 30-second intervals
+				log.Printf("Error getting device IDs for date %s: %v", dateStr, err)
 
-				log.Printf("Generated gauge data with %d points for ObjectID %d", len(gaugePoints), objectID)
+				continue
 
-				response.Data[objectID] = gaugePoints
+			}
 
-			} else if query.Aggregation != "" && len(allDataPoints) > 0 {
+			// Add to map for uniqueness
+			for _, id := range dayDeviceIDs {
 
-				aggregatedPoints := aggregateDataPoints(allDataPoints, query.Aggregation)
+				deviceIDsMap[id] = true
 
-				log.Printf("Aggregated %d points to %d points using %s", len(allDataPoints), len(aggregatedPoints), query.Aggregation)
+			}
 
-				response.Data[objectID] = aggregatedPoints
+		}
+
+		objectIDs = make([]uint32, 0, len(deviceIDsMap))
+
+		for id := range deviceIDsMap {
+
+			objectIDs = append(objectIDs, id)
+
+		}
+
+		duration := time.Since(startTime)
+
+		log.Printf("Found %d unique devices for all-devices query in %v", len(objectIDs), duration)
+
+	} else {
+
+		objectIDs = query.ObjectIDs
+
+	}
+
+	var wg sync.WaitGroup
+
+	dataMutex := sync.RWMutex{}
+
+	maxConcurrent := 200 // Maximum number of concurrent device queries
+
+	if len(objectIDs) > 100 {
+
+		// Further reduce concurrency for very large device sets
+		maxConcurrent = 100
+
+	}
+
+	// semaphore channel
+	sem := make(chan struct{}, maxConcurrent)
+
+	for _, objectID := range objectIDs {
+
+		wg.Add(1)
+
+		sem <- struct{}{}
+
+		go func(objID uint32) {
+
+			defer func() {
+
+				<-sem
+				wg.Done()
+
+			}()
+
+			dataPoints, err := processObjectData(storage, objID, query)
+
+			if err != nil {
+
+				log.Printf("Error processing object %d: %v", objID, err)
+
+				return
+
+			}
+
+			var validPoints []models.DataPoint
+
+			for _, point := range dataPoints {
+
+				if isReasonableValue(point.Value) {
+
+					validPoints = append(validPoints, point)
+
+				} else {
+
+					validPoints = append(validPoints, models.DataPoint{
+
+						Timestamp: point.Timestamp,
+
+						Value: 0.0,
+					})
+				}
+			}
+
+			validPoints = deduplicateDataPoints(validPoints)
+
+			// If no aggregation is specified, return all datapoints
+
+			var processedPoints []models.DataPoint
+
+			if query.Aggregation == "" {
+
+				processedPoints = validPoints
 
 			} else {
 
-				response.Data[objectID] = allDataPoints
+				processedPoints = aggregateData(validPoints, query)
 
 			}
+
+			if len(processedPoints) > 0 {
+
+				dataMutex.Lock()
+
+				response.Data[objID] = processedPoints
+
+				dataMutex.Unlock()
+
+			}
+
+		}(objectID)
+	}
+
+	wg.Wait()
+
+	return response
+}
+
+func deduplicateDataPoints(points []models.DataPoint) []models.DataPoint {
+
+	if len(points) == 0 {
+		return points
+	}
+
+	// Sort by timestamp
+	sort.Slice(points, func(i, j int) bool {
+		return points[i].Timestamp < points[j].Timestamp
+	})
+
+	// Group points by timestamp
+	timestampMap := make(map[uint32][]models.DataPoint)
+
+	for _, point := range points {
+
+		timestampMap[point.Timestamp] = append(timestampMap[point.Timestamp], point)
+
+	}
+
+	// Process each group to pick the best value
+	var deduplicated []models.DataPoint
+
+	for timestamp, timePoints := range timestampMap {
+
+		if len(timePoints) == 1 {
+
+			deduplicated = append(deduplicated, timePoints[0])
+
+			continue
+
 		}
 
-		// Send response
-		log.Printf("Sending response for QueryID %d with %d objects", query.QueryID, len(response.Data))
+		bestPoint := findBestDataPoint(timePoints)
 
-		queryResultCh <- response
+		deduplicated = append(deduplicated, models.DataPoint{
+
+			Timestamp: timestamp,
+
+			Value: bestPoint.Value,
+		})
+
+	}
+
+	sort.Slice(deduplicated, func(i, j int) bool {
+		return deduplicated[i].Timestamp < deduplicated[j].Timestamp
+	})
+
+	return deduplicated
+}
+
+func findBestDataPoint(points []models.DataPoint) models.DataPoint {
+
+	if len(points) == 1 {
+		return points[0]
+	}
+
+	// Prefer values that are not extremely large or small (likely invalid/pointer values)
+
+	var validPoints []models.DataPoint
+
+	for _, point := range points {
+
+		if isReasonableValue(point.Value) {
+
+			validPoints = append(validPoints, point)
+
+		}
+	}
+
+	// If we found valid points, return the first one
+	if len(validPoints) > 0 {
+		return validPoints[0]
+	}
+
+	// If all values seem invalid, create a zero value as fallback
+	return models.DataPoint{
+
+		Timestamp: points[0].Timestamp,
+
+		Value: 0.0, // Use 0.0 instead of garbage data
+
 	}
 }
 
-// reads data for a object ID from storage ;)
+func isReasonableValue(value interface{}) bool {
+
+	switch v := value.(type) {
+
+	case float64:
+		// Check if it's too large (likely a memory address or invalid float)
+		if math.Abs(v) > 1e10 {
+			return false
+		}
+
+		// Check if it's too small (likely an uninitialized value)
+		if math.Abs(v) < 1e-300 {
+			return false
+		}
+
+		return true
+
+	case int64:
+
+		// Check if it's too large (likely a memory address)
+		if math.Abs(float64(v)) > 1e10 {
+			return false
+		}
+		return true
+
+	default:
+
+		return true // Assume other types are valid
+	}
+}
+
+// processObjectData handles data processing for a single object
+func processObjectData(storage *storageEngine.StorageEngine, objectID uint32, query models.Query) ([]models.DataPoint, error) {
+
+	var allDataPoints []models.DataPoint
+
+	fromTime := time.Unix(int64(query.From), 0)
+
+	toTime := time.Unix(int64(query.To), 0)
+
+	var dayWg sync.WaitGroup
+
+	var dataMutex sync.RWMutex
+
+	// Process each day in parallel
+	for d := fromTime; !d.After(toTime); d = d.AddDate(0, 0, 1) {
+
+		dayWg.Add(1)
+
+		go func(date time.Time) {
+
+			defer dayWg.Done()
+
+			dateStr := date.Format("2006/01/02")
+
+			counterPath := filepath.Join(
+				utils.GetStoragePath(),
+				dateStr,
+				fmt.Sprintf("counter_%d", query.CounterId),
+			)
+
+			if err := storage.SetStoragePath(counterPath); err != nil {
+
+				log.Printf("Error setting storage path for date %s: %v", dateStr, err)
+
+				return
+
+			}
+
+			dataPoints, err := readDataForObject(storage, int(objectID), query.From, query.To, query.CounterId)
+
+			if err != nil {
+
+				log.Printf("Error reading data for ObjectID %d on %s: %v", objectID, dateStr, err)
+
+				return
+
+			}
+
+			if len(dataPoints) > 0 {
+
+				dataMutex.Lock()
+
+				allDataPoints = append(allDataPoints, dataPoints...)
+
+				dataMutex.Unlock()
+
+			}
+
+		}(d)
+	}
+
+	dayWg.Wait()
+
+	return allDataPoints, nil
+
+}
+
+// aggregateData applies the specified aggregation to the data points
+func aggregateData(points []models.DataPoint, query models.Query) []models.DataPoint {
+
+	if len(points) == 0 {
+		return nil
+	}
+
+	switch query.Aggregation {
+
+	case "histogram":
+
+		interval := query.Interval
+
+		if interval == 0 {
+
+			interval = DefaultHistogramInterval
+
+		}
+
+		return generateHistogram(points, int(interval))
+
+	case "gauge":
+
+		return generateGauge(points, int(query.Interval))
+
+	default:
+
+		return aggregateDataPoints(points, query.Aggregation)
+
+	}
+}
+
+// readDataForObject reads data for a specific object from storage
 func readDataForObject(storage *storageEngine.StorageEngine, objectID int, fromTime uint32, toTime uint32, counterID uint16) ([]models.DataPoint, error) {
 
 	var dataPoints []models.DataPoint
@@ -137,45 +439,138 @@ func readDataForObject(storage *storageEngine.StorageEngine, objectID int, fromT
 	rawDataBlocks, err := storage.Get(objectID)
 
 	if err != nil {
-
 		return nil, fmt.Errorf("failed to get data blocks: %v", err)
-
 	}
 
 	if len(rawDataBlocks) == 0 {
-
-		return dataPoints, nil // No data for this object ID
-
+		return dataPoints, nil
 	}
 
 	expectedType, err := utils.GetCounterType(counterID)
 
 	if err != nil {
-
 		return nil, fmt.Errorf("failed to get counter type: %v", err)
-
 	}
 
+	var blockWg sync.WaitGroup
+
+	var dataMutex sync.RWMutex
+
+	// Process blocks in parallel
 	for _, blockData := range rawDataBlocks {
 
-		// Process this block only if it contains data
+		if len(blockData) == 0 {
 
-		if len(blockData) > 0 {
+			continue
 
-			// Deserialize data points from this block
-			points, err := deserializeDataBlock(blockData, fromTime, toTime, expectedType)
+		}
+
+		blockWg.Add(1)
+
+		go func(data []byte) {
+
+			defer blockWg.Done()
+
+			points, err := deserializeDataBlock(data, fromTime, toTime, expectedType)
 
 			if err != nil {
 
-				log.Printf("Error deserializing block for ObjectID %d: %v", objectID, err)
+				log.Printf("Error deserializing block: %v", err)
 
-				continue
+				return
 
 			}
 
-			dataPoints = append(dataPoints, points...)
+			if len(points) > 0 {
+
+				dataMutex.Lock()
+
+				dataPoints = append(dataPoints, points...)
+
+				dataMutex.Unlock()
+
+			}
+
+		}(blockData)
+	}
+
+	blockWg.Wait()
+
+	return dataPoints, nil
+}
+
+// generateGauge creates gauge data points at specified intervals
+func generateGauge(points []models.DataPoint, intervalSeconds int) []models.DataPoint {
+
+	if len(points) == 0 {
+		return nil
+	}
+
+	// Filter out invalid points first
+
+	var validPoints []models.DataPoint
+
+	for _, point := range points {
+
+		if isReasonableValue(point.Value) {
+
+			validPoints = append(validPoints, point)
+
 		}
 	}
 
-	return dataPoints, nil
+	// Default to 30 seconds if interval is not specified
+	if intervalSeconds <= 0 {
+
+		intervalSeconds = 30
+
+	}
+
+	// Sort points by timestamp
+	sort.Slice(validPoints, func(i, j int) bool {
+		return validPoints[i].Timestamp < validPoints[j].Timestamp
+	})
+
+	// Find min and max timestamps
+	minTime := validPoints[0].Timestamp
+
+	maxTime := validPoints[len(validPoints)-1].Timestamp
+
+	// Align to interval boundaries
+	startTime := (minTime / uint32(intervalSeconds)) * uint32(intervalSeconds)
+
+	endTime := ((maxTime / uint32(intervalSeconds)) + 1) * uint32(intervalSeconds)
+
+	var result []models.DataPoint
+
+	// For each interval
+	for ts := startTime; ts < endTime; ts += uint32(intervalSeconds) {
+
+		// Find latest value before this interval end
+		var latestPoint *models.DataPoint
+
+		for i := range validPoints {
+
+			if validPoints[i].Timestamp <= ts && (latestPoint == nil || validPoints[i].Timestamp > latestPoint.Timestamp) {
+
+				latestPoint = &validPoints[i]
+
+			}
+
+		}
+
+		if latestPoint != nil {
+
+			result = append(result, models.DataPoint{
+
+				Timestamp: ts,
+
+				Value: latestPoint.Value,
+			})
+
+		}
+
+	}
+
+	return result
 }

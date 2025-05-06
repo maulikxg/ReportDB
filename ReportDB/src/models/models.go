@@ -26,6 +26,10 @@ type Query struct {
 	CounterId uint16 `json:"counter_id"`
 
 	Aggregation string `json:"aggregation"`
+	
+	Interval uint32 `json:"interval"`
+
+	GroupByObjects bool `json:"group_by_objects"`
 }
 
 type QueryResponse struct {

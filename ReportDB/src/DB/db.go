@@ -48,19 +48,8 @@ func InitDB(dataWriteCh <-chan []models.Metric, queryReceiveCh <-chan models.Que
 
 	}()
 
+	// Initialize the query engine
 	go reader.InitQueryEngine(queryReceiveCh, queryResponseCh, &dbInternalWg)
-
-	go func() {
-
-		defer dbInternalWg.Done()
-
-		log.Println("Starting Query Engine... (placeholder)")
-
-		<-make(chan struct{})
-
-		log.Println("Query Engine stopped. (placeholder)")
-
-	}()
 
 	log.Println("DB Initialized. Waiting for Writer Handler and Query Engine to stop...")
 

@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	. "packx/utils"
 	"path/filepath"
@@ -434,4 +435,50 @@ func (bs *StorageEngine) initializeBlockHeader(deviceID int, dataType byte, time
 
 		DataType: dataType,
 	}
+}
+
+// GetAllDeviceIDs returns a list of all device IDs found in storage across all partitions
+func (bs *StorageEngine) GetAllDeviceIDs() ([]uint32, error) {
+	basePath := bs.getStoragePath()
+	if basePath == "" {
+		return nil, fmt.Errorf("storage path not set")
+	}
+
+	deviceIDs := make(map[uint32]bool) // Use map to ensure uniqueness
+
+	// Scan through all partitions
+	for partition := 0; partition < NumPartitions; partition++ {
+		partitionPath := filepath.Join(basePath, fmt.Sprintf("partition_%d", partition))
+		indexPath := filepath.Join(partitionPath, "index.json")
+
+		// Skip if partition directory doesn't exist
+		if _, err := os.Stat(partitionPath); os.IsNotExist(err) {
+			continue
+		}
+
+		// Skip if index file doesn't exist
+		if _, err := os.Stat(indexPath); os.IsNotExist(err) {
+			continue
+		}
+
+		// Read index file
+		index, err := bs.readIndex(indexPath)
+		if err != nil {
+			log.Printf("Error reading index for partition %d: %v", partition, err)
+			continue // Skip this partition if there's an error
+		}
+
+		// Extract unique device IDs
+		for _, entry := range index {
+			deviceIDs[uint32(entry.DeviceID)] = true
+		}
+	}
+
+	// Convert map keys to slice
+	result := make([]uint32, 0, len(deviceIDs))
+	for id := range deviceIDs {
+		result = append(result, id)
+	}
+
+	return result, nil
 }

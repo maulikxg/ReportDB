@@ -230,3 +230,6 @@ which is matches our models.go declarations.now i do thinks the way we are writi
          "block_offset": 12288,
          "current_offset": 0
      } this so why this when i declare the size in @config.json of the block is 1024 so explain all this and how this all are being the happning 
+
+
+	 

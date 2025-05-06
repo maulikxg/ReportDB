@@ -1,4 +1,4 @@
-package main
+package v1
 
 import (
 	"fmt"
@@ -6,6 +6,17 @@ import (
 	"packx/client"
 	"packx/models"
 	"time"
+)
+
+package main
+
+import (
+"encoding/json"
+"fmt"
+"log"
+"packx/client"
+"packx/models"
+"time"
 )
 
 func main() {
@@ -154,7 +165,6 @@ func main() {
 	//time.Sleep(5 * time.Second)
 
 	// Request the same data with aggregation to compare
-	time.Sleep(500 * time.Millisecond) // Add delay between queries
 
 	aggregationQuery := models.Query{
 
@@ -212,9 +222,6 @@ func main() {
 
 	}
 
-	// Add a small delay before the next query
-	time.Sleep(500 * time.Millisecond)
-
 	histogramQuery := models.Query{
 
 		QueryID: uint64(time.Now().UnixNano()) + 2,
@@ -233,17 +240,8 @@ func main() {
 	}
 
 	log.Printf("\nSending HISTOGRAM query: %+v", histogramQuery)
-	
-	// **** Start Timing ****
-	startTimeHistogramQuery := time.Now()
-	// **********************
 
 	histResponse, err := cli.SendQuery(histogramQuery)
-
-	// **** Stop Timing and Log Duration ****
-	durationHistogramQuery := time.Since(startTimeHistogramQuery)
-	log.Printf("Histogram data query execution time: %v", durationHistogramQuery)
-	// **************************************
 
 	if err != nil {
 
@@ -305,9 +303,6 @@ func main() {
 		}
 	}
 
-	// Add a small delay before the next query
-	time.Sleep(500 * time.Millisecond)
-
 	gaugeQuery := models.Query{
 
 		QueryID:     uint64(time.Now().UnixNano()) + 3,
@@ -324,46 +319,32 @@ func main() {
 	gaugeResponse, err := cli.SendQuery(gaugeQuery)
 
 	if err != nil {
-
 		log.Printf("Error sending gauge query: %v", err)
-
 	} else {
-
 		fmt.Println("\nGAUGE RESPONSE:")
 		fmt.Println("===============")
 
 		for objID, dataPoints := range gaugeResponse.Data {
-
 			fmt.Printf("\nObject ID: %d (Points: %d)\n", objID, len(dataPoints))
 
 			if len(dataPoints) == 0 {
-
 				fmt.Println("  NO GAUGE DATA FOUND")
-
 				continue
-
 			}
 
 			fmt.Println("\nInterval Start Time    | Unix Time | Value              | Value Type")
-
 			fmt.Println("----------------------|-----------|--------------------|-----------")
 
 			for _, dp := range dataPoints {
-
 				timeStr := time.Unix(int64(dp.Timestamp), 0).Format("2006-01-02 15:04:05")
 
 				var valueType string
-
 				var valueStr string
 
 				switch v := dp.Value.(type) {
-
 				case float64:
-
 					valueType = "float64"
-
 					valueStr = fmt.Sprintf("%.6f", v)
-
 				case float32:
 					valueType = "float32"
 					valueStr = fmt.Sprintf("%.6f", v)
@@ -389,9 +370,6 @@ func main() {
 		}
 	}
 
-	// Add a small delay before the grid query
-	time.Sleep(500 * time.Millisecond)
-
 	// Test Grid Query with GroupByObjects
 	gridQuery := models.Query{
 		QueryID:        uint64(time.Now().UnixNano()) + 4,
@@ -404,18 +382,9 @@ func main() {
 	}
 
 	log.Printf("\nSending GRID query with GroupByObjects: %+v", gridQuery)
-	
-	// **** Start Timing ****
-	startTimeGridQuery := time.Now()
-	// **********************
 
 	gridResponse, err := cli.SendQuery(gridQuery)
 
-	// **** Stop Timing and Log Duration ****
-	durationGridQuery := time.Since(startTimeGridQuery)
-	log.Printf("Grid query execution time: %v", durationGridQuery)
-	// **************************************
-	
 	if err != nil {
 		log.Printf("Error sending grid query: %v", err)
 	} else {
@@ -438,9 +407,6 @@ func main() {
 		}
 	}
 
-	// Add a small delay before the ALL DEVICES query
-	time.Sleep(500 * time.Millisecond)
-
 	// Test ALL DEVICES query - new feature
 	// Use a smaller time range for ALL DEVICES query to reduce processing time
 	twoMinutesAgo := uint32(time.Now().Add(-2 * time.Minute).Unix())
@@ -452,7 +418,7 @@ func main() {
 		ObjectIDs:      []uint32{}, // Empty array means all devices
 		CounterId:      1,
 		GroupByObjects: true, // Group results by object ID
-		Aggregation:    "",
+		Aggregation:    "avg",
 	}
 
 	log.Printf("\nSending ALL DEVICES query for counter %d: %+v", allDevicesQuery.CounterId, allDevicesQuery)
@@ -465,7 +431,7 @@ func main() {
 	// **********************
 
 	// Use longer timeout (60 seconds) for all-devices query since it can be more intensive
-	allDevicesResponse, err := cli.SendQuery(allDevicesQuery)
+	allDevicesResponse, err := SendQueryWithTimeout(cli, allDevicesQuery, 60*time.Second)
 
 	if err != nil {
 		log.Printf("Error sending ALL DEVICES query: %v", err)
@@ -517,63 +483,43 @@ func main() {
 		}
 	}
 
-	// Now test with a longer time range to test performance with more data
-	oneHourAgo := uint32(time.Now().Add(-1 * time.Hour).Unix())
-
-	allDevicesLongQuery := models.Query{
-		QueryID:        uint64(time.Now().UnixNano()) + 6,
-		From:           oneHourAgo, // One hour of data
-		To:             currentTime,
-		ObjectIDs:      []uint32{}, // Empty array means all devices
-		CounterId:      1,
-		GroupByObjects: true,
-		Aggregation:    "", // Try a different aggregation function
-		Interval:       0,  // 1-minute buckets for histogram-style aggregation
-	}
-
-	log.Printf("\nSending LONG-RANGE ALL DEVICES query: %+v", allDevicesLongQuery)
-	fmt.Printf("\nLONG RANGE QUERY - TIME RANGE: %s to %s\n",
-		time.Unix(int64(allDevicesLongQuery.From), 0).Format("15:04:05"),
-		time.Unix(int64(allDevicesLongQuery.To), 0).Format("15:04:05"))
-
-	// **** Start Timing ****
-	startTimeLongRange := time.Now()
-	// **********************
-
-	// Use longer timeout (120 seconds) for long range query
-	longRangeResponse, err := cli.SendQuery(allDevicesLongQuery)
-
-	if err != nil {
-		log.Printf("Error sending LONG-RANGE ALL DEVICES query: %v", err)
-	} else {
-		// **** Stop Timing and Log Duration ****
-		durationLongRange := time.Since(startTimeLongRange)
-		log.Printf("LONG-RANGE ALL DEVICES query execution time: %v", durationLongRange)
-		// **************************************
-
-		fmt.Println("\nLONG-RANGE ALL DEVICES QUERY RESPONSE:")
-		fmt.Println("======================================")
-		fmt.Printf("Found data for %d devices\n", len(longRangeResponse.Data))
-
-		// Print summary info
-		fmt.Println("\nSUMMARY BY DEVICE:")
-		fmt.Println("-----------------")
-		for objID, dataPoints := range longRangeResponse.Data {
-			fmt.Printf("Device %d: %d data points\n", objID, len(dataPoints))
-		}
-
-		// Print only a summary to avoid overwhelming output
-		totalDataPoints := 0
-		for _, dataPoints := range longRangeResponse.Data {
-			totalDataPoints += len(dataPoints)
-		}
-		fmt.Printf("\nTotal data points across all devices: %d\n", totalDataPoints)
-		fmt.Printf("Average data points per device: %.2f\n",
-			float64(totalDataPoints)/float64(len(longRangeResponse.Data)))
-		fmt.Println("======================================")
-	}
-
 	log.Println("Query testing finished. Closing client shortly...")
 
 	time.Sleep(1 * time.Second)
 }
+
+// SendQueryWithTimeout sends a query to the server and waits for a response
+// with a custom timeout (instead of the default 30 seconds)
+func SendQueryWithTimeout(cli *client.QueryClient, query models.Query, timeout time.Duration) (*models.QueryResponse, error) {
+	queryBytes, err := json.Marshal(query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal query: %v", err)
+	}
+
+	log.Printf("Sending query to server with %s timeout: %+v", timeout, query)
+
+	_, err = cli.GetSendSocket().SendBytes(queryBytes, 0)
+	if err != nil {
+		return nil, fmt.Errorf("failed to send query: %v", err)
+	}
+
+	log.Printf("Query sent successfully (ID: %d)", query.QueryID)
+
+	// Wait for response with the specified timeout
+	log.Printf("Waiting for response to query ID: %d (timeout: %s)", query.QueryID, timeout)
+
+	select {
+	case response := <-cli.GetResponseChannel():
+		if response.QueryID == query.QueryID {
+			log.Printf("Received matching response for query ID: %d", query.QueryID)
+			return &response, nil
+		}
+		return nil, fmt.Errorf("received response for different query (expected: %d, got: %d)",
+			query.QueryID, response.QueryID)
+	case <-time.After(timeout):
+		return nil, fmt.Errorf("timeout waiting for response to query ID: %d (after %s)",
+			query.QueryID, timeout)
+	}
+}
+
+so now i want the add this  special query case in which if not if not any devices givenin the query just counter and timestamps of from to to given in that case get the data of that time stamps range of all the devices so how to implemt this optimizally

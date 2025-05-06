@@ -22,9 +22,9 @@ func main() {
 	// GET CURRENT SERVER TIME
 	currentTime := uint32(time.Now().Unix())
 
-	fiveMinutesAgo := uint32(time.Now().Add(-5 * time.Minute).Unix())
+	//fiveMinutesAgo := uint32(time.Now().Add(-55 * time.Minute).Unix())
 
-	//fiveMinutesAgo := uint32(time.Now().Add(-8 * 24 * time.Hour).Unix())
+	fiveMinutesAgo := uint32(time.Now().Add(-15 * 24 * time.Hour).Unix())
 
 	log.Printf("Current time: %d (%s)", currentTime, time.Unix(int64(currentTime), 0))
 
@@ -34,7 +34,7 @@ func main() {
 		QueryID:     uint64(time.Now().UnixNano()),
 		From:        fiveMinutesAgo,
 		To:          currentTime,
-		ObjectIDs:   []uint32{0, 1, 2},
+		ObjectIDs:   []uint32{0, 1, 2, 3},
 		CounterId:   2,
 		Aggregation: "", // Request raw data points (no aggregation)
 	}
@@ -90,59 +90,6 @@ func main() {
 
 		fmt.Println("----------------------|-----------|--------------------|-----------")
 
-		for _, dp := range dataPoints {
-
-			// Convert timestamp to readable format
-			timeStr := time.Unix(int64(dp.Timestamp), 0).Format("2006-01-02 15:04:05")
-
-			var valueType string
-
-			var valueStr string
-
-			switch v := dp.Value.(type) {
-
-			case float64:
-
-				valueType = "float64"
-
-				valueStr = fmt.Sprintf("%.6f", v)
-
-			case float32:
-
-				valueType = "float32"
-
-				valueStr = fmt.Sprintf("%.6f", v)
-
-			case int:
-
-				valueType = "int"
-
-				valueStr = fmt.Sprintf("%d", v)
-
-			case int64:
-
-				valueType = "int64"
-
-				valueStr = fmt.Sprintf("%d", v)
-
-			case string:
-
-				valueType = "string"
-
-				valueStr = v
-
-			default:
-
-				valueType = fmt.Sprintf("%T", v)
-
-				valueStr = fmt.Sprintf("%v", v)
-
-			}
-
-			fmt.Printf("%-22s | %-9d | %-18s | %s\n",
-				timeStr, dp.Timestamp, valueStr, valueType)
-
-		}
 	}
 
 	// **** Stop Timing and Log Duration ****
@@ -151,10 +98,12 @@ func main() {
 	log.Printf("Raw data query execution time: %v", durationRawQuery) // Log the duration
 	// **************************************
 
-	//time.Sleep(5 * time.Second)
+	//	time.Sleep(5 * time.Second)
 
 	// Request the same data with aggregation to compare
 	time.Sleep(500 * time.Millisecond) // Add delay between queries
+
+	startTimeAggQuery := time.Now()
 
 	aggregationQuery := models.Query{
 
@@ -190,30 +139,20 @@ func main() {
 
 			fmt.Printf("\nObject ID: %d (Points: %d)\n", objID, len(dataPoints))
 
-			for _, dp := range dataPoints {
-
-				timeStr := time.Unix(int64(dp.Timestamp), 0).Format("2006-01-02 15:04:05")
-
-				switch v := dp.Value.(type) {
-
-				case float64:
-					fmt.Printf("  Avg value: %.6f (Time: %s)\n", v, timeStr)
-
-				default:
-					fmt.Printf("  Value: %v (Type: %T, Time: %s)\n", v, v, timeStr)
-
-				}
-
-			}
-
 			fmt.Println("====================")
 
 		}
 
 	}
 
-	// Add a small delay before the next query
-	time.Sleep(500 * time.Millisecond)
+	durationAggQuery := time.Since(startTimeAggQuery)
+
+	log.Printf("aggrigation data query execution time: %v", durationAggQuery) // Log the duration
+
+	//time.Sleep(5 * time.Second)
+	time.Sleep(500 * time.Millisecond) // Add delay between queries
+
+	startTimeHistoQuery := time.Now()
 
 	histogramQuery := models.Query{
 
@@ -233,17 +172,8 @@ func main() {
 	}
 
 	log.Printf("\nSending HISTOGRAM query: %+v", histogramQuery)
-	
-	// **** Start Timing ****
-	startTimeHistogramQuery := time.Now()
-	// **********************
 
 	histResponse, err := cli.SendQuery(histogramQuery)
-
-	// **** Stop Timing and Log Duration ****
-	durationHistogramQuery := time.Since(startTimeHistogramQuery)
-	log.Printf("Histogram data query execution time: %v", durationHistogramQuery)
-	// **************************************
 
 	if err != nil {
 
@@ -271,42 +201,18 @@ func main() {
 
 			fmt.Println("----------------------|-----------|-------")
 
-			for _, dp := range dataPoints {
-
-				timeStr := time.Unix(int64(dp.Timestamp), 0).Format("2006-01-02 15:04:05")
-
-				var countValue int
-
-				switch v := dp.Value.(type) {
-
-				case int:
-
-					countValue = v
-
-				case float64:
-
-					countValue = int(v)
-
-				default:
-
-					countValue = 0
-
-					fmt.Printf("%-22s | %-9d | %d (original type: %T)\n",
-						timeStr, dp.Timestamp, countValue, dp.Value)
-
-					continue
-
-				}
-
-				fmt.Printf("%-22s | %-9d | %d\n", timeStr, dp.Timestamp, countValue)
-			}
-
 			fmt.Println("===================")
 		}
 	}
 
-	// Add a small delay before the next query
-	time.Sleep(500 * time.Millisecond)
+	durationhistoQuery := time.Since(startTimeHistoQuery)
+
+	log.Printf("Histogram data query execution time: %v", durationhistoQuery) // Log the duration
+
+	//time.Sleep(5 * time.Second)
+	time.Sleep(500 * time.Millisecond) // Add delay between queries
+
+	startTimegaugeQuery := time.Now()
 
 	gaugeQuery := models.Query{
 
@@ -348,49 +254,18 @@ func main() {
 
 			fmt.Println("----------------------|-----------|--------------------|-----------")
 
-			for _, dp := range dataPoints {
-
-				timeStr := time.Unix(int64(dp.Timestamp), 0).Format("2006-01-02 15:04:05")
-
-				var valueType string
-
-				var valueStr string
-
-				switch v := dp.Value.(type) {
-
-				case float64:
-
-					valueType = "float64"
-
-					valueStr = fmt.Sprintf("%.6f", v)
-
-				case float32:
-					valueType = "float32"
-					valueStr = fmt.Sprintf("%.6f", v)
-				case int:
-					valueType = "int"
-					valueStr = fmt.Sprintf("%d", v)
-				case int64:
-					valueType = "int64"
-					valueStr = fmt.Sprintf("%d", v)
-				case string:
-					valueType = "string"
-					valueStr = v
-				default:
-					valueType = fmt.Sprintf("%T", v)
-					valueStr = fmt.Sprintf("%v", v)
-				}
-
-				fmt.Printf("%-22s | %-9d | %-18s | %s\n",
-					timeStr, dp.Timestamp, valueStr, valueType)
-			}
-
 			fmt.Println("===============")
 		}
 	}
 
-	// Add a small delay before the grid query
-	time.Sleep(500 * time.Millisecond)
+	durationgaugeQuery := time.Since(startTimegaugeQuery)
+
+	log.Printf("Gauge data query execution time: %v", durationgaugeQuery) // Log the duration
+
+	//time.Sleep(5 * time.Second)
+	time.Sleep(500 * time.Millisecond) // Add delay between queries
+
+	startTimeGridQuery := time.Now()
 
 	// Test Grid Query with GroupByObjects
 	gridQuery := models.Query{
@@ -404,18 +279,9 @@ func main() {
 	}
 
 	log.Printf("\nSending GRID query with GroupByObjects: %+v", gridQuery)
-	
-	// **** Start Timing ****
-	startTimeGridQuery := time.Now()
-	// **********************
 
 	gridResponse, err := cli.SendQuery(gridQuery)
 
-	// **** Stop Timing and Log Duration ****
-	durationGridQuery := time.Since(startTimeGridQuery)
-	log.Printf("Grid query execution time: %v", durationGridQuery)
-	// **************************************
-	
 	if err != nil {
 		log.Printf("Error sending grid query: %v", err)
 	} else {
@@ -430,16 +296,20 @@ func main() {
 				continue
 			}
 
-			for _, dp := range dataPoints {
-				timeStr := time.Unix(int64(dp.Timestamp), 0).Format("2006-01-02 15:04:05")
-				fmt.Printf("  Timestamp: %s, Value: %v\n", timeStr, dp.Value)
-			}
+			//for _, dp := range dataPoints {
+			//	timeStr := time.Unix(int64(dp.Timestamp), 0).Format("2006-01-02 15:04:05")
+			//	fmt.Printf("  Timestamp: %s, Value: %v\n", timeStr, dp.Value)
+			//}
 			fmt.Println("--------------------")
 		}
 	}
 
-	// Add a small delay before the ALL DEVICES query
-	time.Sleep(500 * time.Millisecond)
+	durationGridQuery := time.Since(startTimeGridQuery)
+
+	log.Printf("Grid data query execution time: %v", durationGridQuery) // Log the duration
+
+	//time.Sleep(5 * time.Second)
+	time.Sleep(500 * time.Millisecond) // Add delay between queries
 
 	// Test ALL DEVICES query - new feature
 	// Use a smaller time range for ALL DEVICES query to reduce processing time

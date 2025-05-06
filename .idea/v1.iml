@@ -6,6 +6,7 @@
       <excludeFolder url="file://$MODULE_DIR$/Trash" />
       <excludeFolder url="file://$MODULE_DIR$/Trash/backend" />
       <excludeFolder url="file://$MODULE_DIR$/Trash/poller" />
+      <excludeFolder url="file://$MODULE_DIR$/reader" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

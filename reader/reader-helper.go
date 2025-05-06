@@ -88,66 +88,88 @@ func generateHistogram(dataPoints []models.DataPoint, bucketSizeSeconds int) []m
 }
 
 func deserializeDataBlock(blockData []byte, fromTime uint32, toTime uint32, dataType byte) ([]models.DataPoint, error) {
+
 	var dataPoints []models.DataPoint
 
 	// Process data starting from offset 0 (header is not included in the data)
 	offset := 0
 
 	for offset < len(blockData) {
+
 		if offset+4 > len(blockData) {
 			break
 		}
 
-		// Read timestamp (first 4 bytes)
 		timestamp := binary.LittleEndian.Uint32(blockData[offset : offset+4])
+
 		offset += 4
 
-		// Skip the type marker byte (we already know the expected type)
-		if offset < len(blockData) {
-			offset += 1 // Skip the type marker byte
-		} else {
-			break
-		}
-
 		if timestamp < fromTime || timestamp > toTime {
-			// Skip this data point since it's outside our time range
+
 			switch dataType {
+
 			case utils.TypeInt:
+
 				offset += 8
+
 			case utils.TypeFloat:
+
 				offset += 8
+
 			case utils.TypeString:
+
 				if offset+4 > len(blockData) {
+
 					return dataPoints, fmt.Errorf("invalid string format: insufficient data for length")
+
 				}
+
 				strLen := binary.LittleEndian.Uint32(blockData[offset : offset+4])
+
 				offset += 4 + int(strLen)
+
 			default:
+
 				return dataPoints, fmt.Errorf("unknown data type: %d", dataType)
+
 			}
+
 			continue
 		}
 
 		// Read the actual value based on data type
 		var value interface{}
+
 		var valueErr error
 
 		switch dataType {
+
 		case utils.TypeInt:
+
 			value, offset, valueErr = readIntValue(blockData, offset)
+
 		case utils.TypeFloat:
+
 			value, offset, valueErr = readFloatValue(blockData, offset)
+
 		case utils.TypeString:
+
 			value, offset, valueErr = readStringValue(blockData, offset)
+
 		default:
+
 			return dataPoints, fmt.Errorf("unknown data type: %d", dataType)
+
 		}
 
 		if valueErr != nil {
+
 			return dataPoints, valueErr
+
 		}
 
 		dataPoints = append(dataPoints, models.DataPoint{
+
 			Timestamp: timestamp,
 			Value:     value,
 		})
@@ -208,110 +230,223 @@ func readStringValue(data []byte, offset int) (interface{}, int, error) {
 }
 
 func aggregateDataPoints(points []models.DataPoint, aggregation string) []models.DataPoint {
+
 	if len(points) == 0 {
+
 		return points
+
 	}
 
 	// Use the latest timestamp for the aggregated result
+
 	timestamp := points[len(points)-1].Timestamp
 
-	// First filter out any unreasonable values
-	var filteredPoints []models.DataPoint
-	for _, p := range points {
-		if isReasonableValue(p.Value) {
-			filteredPoints = append(filteredPoints, p)
-		}
-	}
-
-	// If all values were filtered out as unreasonable, use the original points
-	if len(filteredPoints) == 0 {
-		filteredPoints = points
-	}
-
 	switch aggregation {
+
 	case "avg":
+
 		sum := 0.0
+
 		count := 0
 
-		for _, p := range filteredPoints {
+		for _, p := range points {
+
 			if val, ok := p.Value.(float64); ok {
+
 				sum += val
+
 				count++
+
 			} else if intVal, ok := p.Value.(int64); ok {
+
 				sum += float64(intVal)
+
 				count++
+
 			}
 		}
 
 		if count > 0 {
+
 			return []models.DataPoint{{
+
 				Timestamp: timestamp,
-				Value:     sum / float64(count),
+
+				Value: sum / float64(count),
 			}}
+
 		}
 
 	case "sum":
+
 		sum := 0.0
 
-		for _, p := range filteredPoints {
+		for _, p := range points {
+
 			if val, ok := p.Value.(float64); ok {
+
 				sum += val
+
 			} else if intVal, ok := p.Value.(int64); ok {
+
 				sum += float64(intVal)
+
 			}
+
 		}
 
 		return []models.DataPoint{{
+
 			Timestamp: timestamp,
-			Value:     sum,
+
+			Value: sum,
 		}}
 
 	case "max":
+
 		max := math.Inf(-1)
 
-		for _, p := range filteredPoints {
+		for _, p := range points {
+
 			var val float64
+
 			if floatVal, ok := p.Value.(float64); ok {
+
 				val = floatVal
+
 			} else if intVal, ok := p.Value.(int64); ok {
+
 				val = float64(intVal)
+
 			} else {
+
 				continue
+
 			}
 
 			max = math.Max(max, val)
+
 		}
 
-		if max != math.Inf(-1) {
-			return []models.DataPoint{{
-				Timestamp: timestamp,
-				Value:     max,
-			}}
-		}
+		return []models.DataPoint{{
+
+			Timestamp: timestamp,
+
+			Value: max,
+		}}
 
 	case "min":
+
 		min := math.Inf(1)
 
-		for _, p := range filteredPoints {
+		for _, p := range points {
+
 			var val float64
+
 			if floatVal, ok := p.Value.(float64); ok {
+
 				val = floatVal
+
 			} else if intVal, ok := p.Value.(int64); ok {
+
 				val = float64(intVal)
+
 			} else {
+
 				continue
 			}
 
 			min = math.Min(min, val)
+
 		}
 
-		if min != math.Inf(1) {
-			return []models.DataPoint{{
-				Timestamp: timestamp,
-				Value:     min,
-			}}
+		return []models.DataPoint{{
+
+			Timestamp: timestamp,
+
+			Value: min,
+		}}
+
+	}
+
+	return points
+}
+
+// generateGauge processes data points to create gauge visualization data
+// It returns the latest value for each interval (default: 30 seconds)
+func generateGauge(dataPoints []models.DataPoint, intervalSeconds int) []models.DataPoint {
+
+	if len(dataPoints) == 0 {
+		return []models.DataPoint{}
+	}
+
+	// If no interval specified, default to 30 seconds
+	if intervalSeconds <= 0 {
+
+		intervalSeconds = 30
+
+	}
+
+	// map to store latest values in each interval
+	gaugePoints := make(map[uint32]models.DataPoint)
+
+	// Determine min and max times
+	minTime := dataPoints[0].Timestamp
+
+	maxTime := dataPoints[0].Timestamp
+
+	for _, dp := range dataPoints {
+
+		if dp.Timestamp < minTime {
+
+			minTime = dp.Timestamp
+
+		}
+
+		if dp.Timestamp > maxTime {
+
+			maxTime = dp.Timestamp
+
 		}
 	}
 
-	return filteredPoints
+	intervalSize := uint32(intervalSeconds)
+
+	for _, dp := range dataPoints {
+
+		intervalStart := dp.Timestamp - (dp.Timestamp % intervalSize)
+
+		existingPoint, exists := gaugePoints[intervalStart]
+
+		if !exists || existingPoint.Timestamp < dp.Timestamp {
+
+			gaugePoints[intervalStart] = dp
+
+		}
+
+	}
+
+	// Convert to slice
+	result := make([]models.DataPoint, 0, len(gaugePoints))
+
+	for _, point := range gaugePoints {
+
+		result = append(result, point)
+
+	}
+
+	// Sort by timestamp
+	for i := 0; i < len(result); i++ {
+
+		for j := i + 1; j < len(result); j++ {
+
+			if result[i].Timestamp > result[j].Timestamp {
+
+				result[i], result[j] = result[j], result[i]
+
+			}
+		}
+	}
+
+	return result
 }

@@ -95,23 +95,15 @@ func NewQueryClient() (*QueryClient, error) {
 
 // SendQuery sends a query to the server and waits for response
 func (c *QueryClient) SendQuery(query models.Query) (*models.QueryResponse, error) {
-
 	queryBytes, err := json.Marshal(query)
-
 	if err != nil {
-
 		return nil, fmt.Errorf("failed to marshal query: %v", err)
-
 	}
 
 	log.Printf("Sending query to server: %+v", query)
-
 	_, err = c.sendSocket.SendBytes(queryBytes, 0)
-
 	if err != nil {
-
 		return nil, fmt.Errorf("failed to send query: %v", err)
-
 	}
 
 	log.Printf("Query sent successfully (ID: %d)", query.QueryID)
@@ -119,83 +111,83 @@ func (c *QueryClient) SendQuery(query models.Query) (*models.QueryResponse, erro
 	// Wait for response with timeout
 	log.Printf("Waiting for response to query ID: %d", query.QueryID)
 
-	select {
-
-	case response := <-c.responses:
-
-		if response.QueryID == query.QueryID {
-
-			log.Printf("Received matching response for query ID: %d", query.QueryID)
-
-			return &response, nil
-
+	// Store for out-of-order responses
+	pendingResponses := make(map[uint64]models.QueryResponse)
+	
+	startTime := time.Now()
+	timeout := 10 * time.Second
+	
+	for {
+		// Check if we've timed out
+		if time.Since(startTime) > timeout {
+			return nil, fmt.Errorf("timeout waiting for response to query ID: %d", query.QueryID)
 		}
-
-		return nil, fmt.Errorf("received response for different query (expected: %d, got: %d)",
-			query.QueryID, response.QueryID)
-
-	case <-time.After(10 * time.Second):
-
-		return nil, fmt.Errorf("timeout waiting for response to query ID: %d", query.QueryID)
-
+		
+		select {
+		case response := <-c.responses:
+			// Check if this is the response we're waiting for
+			if response.QueryID == query.QueryID {
+				log.Printf("Received matching response for query ID: %d", query.QueryID)
+				return &response, nil
+			}
+			
+			// Store this response for future queries that might be waiting for it
+			log.Printf("Received out-of-order response for query ID: %d (expected: %d), storing for later", 
+				response.QueryID, query.QueryID)
+			pendingResponses[response.QueryID] = response
+			
+		case <-time.After(100 * time.Millisecond):
+			// Check stored responses to see if our response arrived out of order
+			if storedResponse, ok := pendingResponses[query.QueryID]; ok {
+				log.Printf("Found matching response in pending responses for query ID: %d", query.QueryID)
+				delete(pendingResponses, query.QueryID)
+				return &storedResponse, nil
+			}
+			// Continue waiting
+		}
 	}
 }
 
 func (c *QueryClient) receiveResponses() {
-
 	log.Println("Starting response receiver...")
-
 	defer log.Println("Response receiver stopped")
 
 	for {
-
 		select {
-
 		case <-c.done:
-
 			return
-
 		default:
-
 			// Try to receive with timeout
 			responseBytes, err := c.recvSocket.RecvBytes(zmq.DONTWAIT)
-
 			if err != nil {
-
 				if err == zmq.ErrorSocketClosed {
-
 					log.Println("Response socket closed")
-
 					return
-
 				}
 				if zmq.AsErrno(err) == zmq.Errno(11) { // EAGAIN
-
 					// No message available, sleep briefly
-
 					time.Sleep(100 * time.Millisecond)
-
 					continue
-
 				}
-
 				log.Printf("Error receiving response: %v", err)
 				continue
 			}
 
 			var response models.QueryResponse
-
 			if err := json.Unmarshal(responseBytes, &response); err != nil {
-
 				log.Printf("Error unmarshalling response: %v", err)
-
 				continue
-
 			}
 
 			log.Printf("[Receiver] Raw response received and unmarshalled for QueryID: %d", response.QueryID)
 			log.Printf("[Receiver] Response for query ID: %d contains data for %d object(s)",
 				response.QueryID, len(response.Data))
+				
+			// Ensure we always have a valid map even if empty
+			if response.Data == nil {
+				response.Data = make(map[uint32][]models.DataPoint)
+				log.Printf("[Receiver] Initialized empty Data map for QueryID: %d", response.QueryID)
+			}
 
 			trySendResponse(c.responses, response)
 		}
@@ -204,26 +196,19 @@ func (c *QueryClient) receiveResponses() {
 
 // Helper function to safely send to the responses channel
 func trySendResponse(ch chan<- models.QueryResponse, resp models.QueryResponse) {
-
 	defer func() {
-
 		if r := recover(); r != nil {
-
 			log.Printf("[Receiver] Failed to send response to channel (likely closed): %v", r)
 		}
 	}()
 
+	// Try to send with a longer timeout since we now store responses
 	select {
-
 	case ch <- resp:
-
 		log.Printf("[Receiver] Response for QueryID %d sent to waiting SendQuery (if any)", resp.QueryID)
-
-	case <-time.After(1 * time.Second):
-
+	case <-time.After(5 * time.Second): // Increased from 1 second
 		log.Printf("[Receiver] Timeout sending response for QueryID %d to channel. No SendQuery waiting?", resp.QueryID)
 	}
-
 }
 
 // Close closes the client connection

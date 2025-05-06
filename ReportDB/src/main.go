@@ -128,6 +128,7 @@ func main() {
 	go InitQueryListener(queryReceiveCh, &globalShutDownWg)
 
 	go InitQueryResponser(queryResponseCh, &globalShutDownWg)
+
 	go InitProfiling()
 	//queryReceiveCh <- query
 
