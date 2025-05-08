@@ -11,15 +11,13 @@ import (
 func generateHistogram(dataPoints []models.DataPoint, bucketSizeSeconds int) []models.DataPoint {
 
 	if len(dataPoints) == 0 {
+
 		return []models.DataPoint{}
+
 	}
 
-	// map to store bucket counts
-	buckets := make(map[uint32]int)
-
-	minTime := dataPoints[0].Timestamp
-
-	maxTime := dataPoints[0].Timestamp
+	// Find min and max timestamps in one pass
+	minTime, maxTime := dataPoints[0].Timestamp, dataPoints[0].Timestamp
 
 	for _, dp := range dataPoints {
 
@@ -28,59 +26,40 @@ func generateHistogram(dataPoints []models.DataPoint, bucketSizeSeconds int) []m
 			minTime = dp.Timestamp
 
 		}
-
 		if dp.Timestamp > maxTime {
 
 			maxTime = dp.Timestamp
 
 		}
-
 	}
 
 	bucketSize := uint32(bucketSizeSeconds)
 
-	// Normalize min time to bucket boundary
 	minBucketTime := minTime - (minTime % bucketSize)
 
-	// Create empty buckets for the entire range
-	for t := minBucketTime; t <= maxTime; t += bucketSize {
+	numBuckets := (maxTime-minBucketTime)/bucketSize + 1
 
-		buckets[t] = 0
+	bucketCounts := make([]int, numBuckets)
 
-	}
-
+	// Pre-calculate bucket indices
 	for _, dp := range dataPoints {
 
-		bucketTime := dp.Timestamp - (dp.Timestamp % bucketSize)
+		bucketIndex := (dp.Timestamp - minBucketTime) / bucketSize
 
-		buckets[bucketTime]++
-
-	}
-
-	// Convert buckets to data points
-	result := make([]models.DataPoint, 0, len(buckets))
-
-	for bucketTime, count := range buckets {
-
-		result = append(result, models.DataPoint{
-
-			Timestamp: bucketTime,
-
-			Value: count,
-		})
+		bucketCounts[bucketIndex]++
 
 	}
 
-	//result  Sort  by timestamp
-	for i := 0; i < len(result); i++ {
+	// Pre-allocate result slice
+	result := make([]models.DataPoint, numBuckets)
 
-		for j := i + 1; j < len(result); j++ {
+	for i := range bucketCounts {
 
-			if result[i].Timestamp > result[j].Timestamp {
+		result[i] = models.DataPoint{
 
-				result[i], result[j] = result[j], result[i]
+			Timestamp: minBucketTime + uint32(i)*bucketSize,
 
-			}
+			Value: bucketCounts[i],
 		}
 	}
 
@@ -88,69 +67,101 @@ func generateHistogram(dataPoints []models.DataPoint, bucketSizeSeconds int) []m
 }
 
 func deserializeDataBlock(blockData []byte, fromTime uint32, toTime uint32, dataType byte) ([]models.DataPoint, error) {
-	var dataPoints []models.DataPoint
 
-	// Process data starting from offset 0 (header is not included in the data)
+	if len(blockData) < 4 {
+
+		return nil, fmt.Errorf("insufficient data: block size < 4 bytes")
+
+	}
+
+	// Pre-allocate dataPoints with estimated capacity
+	estimatedPoints := len(blockData) / 12 // Rough estimate based on minimum point size
+
+	dataPoints := make([]models.DataPoint, 0, estimatedPoints)
+
+	var err error
+
 	offset := 0
 
-	for offset < len(blockData) {
-		if offset+4 > len(blockData) {
-			break
-		}
+	for offset < len(blockData)-4 {
 
-		// Read timestamp (first 4 bytes)
-		timestamp := binary.LittleEndian.Uint32(blockData[offset : offset+4])
+		timestamp := binary.LittleEndian.Uint32(blockData[offset:])
+
 		offset += 4
 
-		// Skip the type marker byte (we already know the expected type)
-		if offset < len(blockData) {
-			offset += 1 // Skip the type marker byte
-		} else {
-			break
-		}
+		// Skip type marker byte
+		offset++
 
 		if timestamp < fromTime || timestamp > toTime {
-			// Skip this data point since it's outside our time range
+
+			// Skip data based on type without reading
 			switch dataType {
-			case utils.TypeInt:
+
+			case utils.TypeInt, utils.TypeFloat:
+
 				offset += 8
-			case utils.TypeFloat:
-				offset += 8
+
 			case utils.TypeString:
+
 				if offset+4 > len(blockData) {
-					return dataPoints, fmt.Errorf("invalid string format: insufficient data for length")
+
+					continue
 				}
-				strLen := binary.LittleEndian.Uint32(blockData[offset : offset+4])
+
+				strLen := binary.LittleEndian.Uint32(blockData[offset:])
+
 				offset += 4 + int(strLen)
+
 			default:
-				return dataPoints, fmt.Errorf("unknown data type: %d", dataType)
+
+				return nil, fmt.Errorf("unknown data type: %d", dataType)
+
 			}
+
 			continue
 		}
 
-		// Read the actual value based on data type
 		var value interface{}
-		var valueErr error
 
 		switch dataType {
-		case utils.TypeInt:
-			value, offset, valueErr = readIntValue(blockData, offset)
-		case utils.TypeFloat:
-			value, offset, valueErr = readFloatValue(blockData, offset)
-		case utils.TypeString:
-			value, offset, valueErr = readStringValue(blockData, offset)
-		default:
-			return dataPoints, fmt.Errorf("unknown data type: %d", dataType)
-		}
 
-		if valueErr != nil {
-			return dataPoints, valueErr
+		case utils.TypeInt:
+
+			if value, offset, err = readIntValue(blockData, offset); err != nil {
+
+				return dataPoints, err
+
+			}
+
+		case utils.TypeFloat:
+
+			if value, offset, err = readFloatValue(blockData, offset); err != nil {
+
+				return dataPoints, err
+
+			}
+
+		case utils.TypeString:
+
+			if value, offset, err = readStringValue(blockData, offset); err != nil {
+
+				return dataPoints, err
+
+			}
+
+		default:
+
+			return nil, fmt.Errorf("unknown data type: %d", dataType)
+
 		}
 
 		dataPoints = append(dataPoints, models.DataPoint{
+
 			Timestamp: timestamp,
-			Value:     value,
+
+			Value: value,
 		})
+
 	}
 
 	return dataPoints, nil
@@ -212,106 +223,97 @@ func aggregateDataPoints(points []models.DataPoint, aggregation string) []models
 		return points
 	}
 
-	// Use the latest timestamp for the aggregated result
+	result := make([]models.DataPoint, 1)
+
 	timestamp := points[len(points)-1].Timestamp
 
-	// First filter out any unreasonable values
-	var filteredPoints []models.DataPoint
+	values := make([]float64, 0, len(points))
+
 	for _, p := range points {
-		if isReasonableValue(p.Value) {
-			filteredPoints = append(filteredPoints, p)
+
+		if val, ok := p.Value.(float64); ok {
+
+			values = append(values, val)
+
+		} else if intVal, ok := p.Value.(int64); ok {
+
+			values = append(values, float64(intVal))
+
 		}
+
 	}
 
-	// If all values were filtered out as unreasonable, use the original points
-	if len(filteredPoints) == 0 {
-		filteredPoints = points
+	if len(values) == 0 {
+
+		return points
+
 	}
 
 	switch aggregation {
+
 	case "avg":
 		sum := 0.0
-		count := 0
-
-		for _, p := range filteredPoints {
-			if val, ok := p.Value.(float64); ok {
-				sum += val
-				count++
-			} else if intVal, ok := p.Value.(int64); ok {
-				sum += float64(intVal)
-				count++
-			}
+		for _, v := range values {
+			sum += v
 		}
-
-		if count > 0 {
-			return []models.DataPoint{{
-				Timestamp: timestamp,
-				Value:     sum / float64(count),
-			}}
+		result[0] = models.DataPoint{
+			Timestamp: timestamp,
+			Value:     sum / float64(len(values)),
 		}
 
 	case "sum":
 		sum := 0.0
-
-		for _, p := range filteredPoints {
-			if val, ok := p.Value.(float64); ok {
-				sum += val
-			} else if intVal, ok := p.Value.(int64); ok {
-				sum += float64(intVal)
-			}
+		for _, v := range values {
+			sum += v
 		}
-
-		return []models.DataPoint{{
+		result[0] = models.DataPoint{
 			Timestamp: timestamp,
 			Value:     sum,
-		}}
-
-	case "max":
-		max := math.Inf(-1)
-
-		for _, p := range filteredPoints {
-			var val float64
-			if floatVal, ok := p.Value.(float64); ok {
-				val = floatVal
-			} else if intVal, ok := p.Value.(int64); ok {
-				val = float64(intVal)
-			} else {
-				continue
-			}
-
-			max = math.Max(max, val)
 		}
 
-		if max != math.Inf(-1) {
-			return []models.DataPoint{{
-				Timestamp: timestamp,
-				Value:     max,
-			}}
+	case "max":
+		max := values[0]
+		for _, v := range values[1:] {
+			if v > max {
+				max = v
+			}
+		}
+		result[0] = models.DataPoint{
+			Timestamp: timestamp,
+			Value:     max,
 		}
 
 	case "min":
-		min := math.Inf(1)
-
-		for _, p := range filteredPoints {
-			var val float64
-			if floatVal, ok := p.Value.(float64); ok {
-				val = floatVal
-			} else if intVal, ok := p.Value.(int64); ok {
-				val = float64(intVal)
-			} else {
-				continue
+		min := values[0]
+		for _, v := range values[1:] {
+			if v < min {
+				min = v
 			}
-
-			min = math.Min(min, val)
+		}
+		result[0] = models.DataPoint{
+			Timestamp: timestamp,
+			Value:     min,
 		}
 
-		if min != math.Inf(1) {
-			return []models.DataPoint{{
-				Timestamp: timestamp,
-				Value:     min,
-			}}
-		}
+	default:
+		return points
 	}
 
-	return filteredPoints
+	return result
 }
+
+//func generateGauge(dataPoints []models.DataPoint, intervalSeconds int) []models.DataPoint {
+//	// ... existing code until sorting ...
+//
+//	// Convert to slice and sort efficiently
+//	result := make([]models.DataPoint, 0, len(gaugePoints))
+//	for _, point := range gaugePoints {
+//		result = append(result, point)
+//	}
+//
+//	sort.Slice(result, func(i, j int) bool {
+//		return result[i].Timestamp < result[j].Timestamp
+//	})
+//
+//	return result
+//}

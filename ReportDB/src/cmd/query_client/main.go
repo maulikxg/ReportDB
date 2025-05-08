@@ -31,12 +31,14 @@ func main() {
 	log.Printf("Five minutes ago: %d (%s)", fiveMinutesAgo, time.Unix(int64(fiveMinutesAgo), 0))
 
 	query := models.Query{
-		QueryID:     uint64(time.Now().UnixNano()),
-		From:        fiveMinutesAgo,
-		To:          currentTime,
-		ObjectIDs:   []uint32{0, 1, 2},
-		CounterId:   2,
-		Aggregation: "", // Request raw data points (no aggregation)
+		QueryID:        uint64(time.Now().UnixNano()),
+		From:           fiveMinutesAgo,
+		To:             currentTime,
+		ObjectIDs:      []uint32{0, 1, 2, 3},
+		CounterId:      1,
+		Aggregation:    "", // Request raw data points (no aggregation)
+		Interval:       0,
+		GroupByObjects: false,
 	}
 
 	log.Printf("Sending RAW DATA query: %+v", query)
@@ -164,12 +166,15 @@ func main() {
 
 		To: currentTime,
 
-		ObjectIDs: []uint32{0, 1},
+		ObjectIDs: []uint32{0, 1, 2, 3},
 
 		CounterId: 1,
 
 		Aggregation: "avg", // Try average aggregation
 
+		Interval: 0,
+
+		GroupByObjects: false,
 	}
 
 	log.Printf("\nSending AGGREGATION query: %+v", aggregationQuery)
@@ -223,17 +228,19 @@ func main() {
 
 		To: currentTime,
 
-		ObjectIDs: []uint32{0, 1},
+		ObjectIDs: []uint32{0, 1, 2, 3},
 
 		CounterId: 1,
 
 		Aggregation: "histogram",
 
 		Interval: 10, // 10-second buckets
+
+		GroupByObjects: false,
 	}
 
 	log.Printf("\nSending HISTOGRAM query: %+v", histogramQuery)
-	
+
 	// **** Start Timing ****
 	startTimeHistogramQuery := time.Now()
 	// **********************
@@ -310,13 +317,14 @@ func main() {
 
 	gaugeQuery := models.Query{
 
-		QueryID:     uint64(time.Now().UnixNano()) + 3,
-		From:        fiveMinutesAgo,
-		To:          currentTime,
-		ObjectIDs:   []uint32{0, 1},
-		CounterId:   1,
-		Aggregation: "gauge",
-		Interval:    30, // 30-second intervals
+		QueryID:        uint64(time.Now().UnixNano()) + 3,
+		From:           fiveMinutesAgo,
+		To:             currentTime,
+		ObjectIDs:      []uint32{0, 1},
+		CounterId:      1,
+		Aggregation:    "",
+		Interval:       0,
+		GroupByObjects: false,
 	}
 
 	log.Printf("\nSending GAUGE query: %+v", gaugeQuery)
@@ -397,14 +405,15 @@ func main() {
 		QueryID:        uint64(time.Now().UnixNano()) + 4,
 		From:           fiveMinutesAgo,
 		To:             currentTime,
-		ObjectIDs:      []uint32{0, 1, 2},
+		ObjectIDs:      []uint32{0, 1, 2, 3},
 		CounterId:      1,
 		GroupByObjects: true,
-		Aggregation:    "AVG",
+		Aggregation:    "",
+		//Aggregation:    "avg",
 	}
 
 	log.Printf("\nSending GRID query with GroupByObjects: %+v", gridQuery)
-	
+
 	// **** Start Timing ****
 	startTimeGridQuery := time.Now()
 	// **********************
@@ -415,7 +424,7 @@ func main() {
 	durationGridQuery := time.Since(startTimeGridQuery)
 	log.Printf("Grid query execution time: %v", durationGridQuery)
 	// **************************************
-	
+
 	if err != nil {
 		log.Printf("Error sending grid query: %v", err)
 	} else {

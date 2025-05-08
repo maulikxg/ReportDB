@@ -9,7 +9,7 @@ import (
 
 const (
 	workerPoolSize = 5 // Number of workers per reader
-
+	//workerPoolSize = runtime.NumCPU()
 )
 
 type QueryEngine struct {

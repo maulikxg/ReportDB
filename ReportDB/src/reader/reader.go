@@ -38,105 +38,64 @@ func processQuery(query models.Query) models.QueryResponse {
 
 	}
 
-	// If ObjectIDs is empty, get all device IDs
+	objectIDs := getObjectIDs(query, storage)
 
-	var objectIDs []uint32
+	// Process based on query type
+	return processQueryByType(query, objectIDs, storage)
 
-	if len(query.ObjectIDs) == 0 {
+}
 
-		log.Printf("Processing all-devices query for counter %d from %d to %d",
-			query.CounterId, query.From, query.To)
+func processQueryByType(query models.Query, objectIDs []uint32, storage *storageEngine.StorageEngine) models.QueryResponse {
 
-		startTime := time.Now()
+	if query.Aggregation == "" {
 
-		// Get all device IDs from the storage engine
-		fromTime := time.Unix(int64(query.From), 0)
+		// Raw data query
+		return processRawDataQuery(query, objectIDs, storage)
+	}
 
-		toTime := time.Unix(int64(query.To), 0)
+	// standard aggregation query
+	switch query.Aggregation {
 
-		// Create a map for uniqueness
-		deviceIDsMap := make(map[uint32]bool)
+	case "avg", "sum", "min", "max":
 
-		// Scan all days in the time range for the specified counter
-		for day := fromTime; !day.After(toTime); day = day.AddDate(0, 0, 1) {
+		return processAggregationQuery(query, objectIDs, storage)
 
-			dateStr := day.Format("2006/01/02")
+	}
 
-			counterPath := filepath.Join(
+	if query.Interval > 0 {
 
-				utils.GetStoragePath(),
+		if query.GroupByObjects {
 
-				dateStr,
-
-				fmt.Sprintf("counter_%d", query.CounterId),
-			)
-
-			if _, err := os.Stat(counterPath); os.IsNotExist(err) {
-
-				continue
-
-			}
-
-			if err := storage.SetStoragePath(counterPath); err != nil {
-
-				log.Printf("Error setting storage path for date %s: %v", dateStr, err)
-
-				continue
-			}
-
-			// Get device IDs for this day
-			dayDeviceIDs, err := storage.GetAllDeviceIDs()
-
-			if err != nil {
-
-				log.Printf("Error getting device IDs for date %s: %v", dateStr, err)
-
-				continue
-
-			}
-
-			// Add to map for uniqueness
-			for _, id := range dayDeviceIDs {
-
-				deviceIDsMap[id] = true
-
-			}
+			return processGroupedHistogramQuery(query, objectIDs, storage)
 
 		}
 
-		objectIDs = make([]uint32, 0, len(deviceIDsMap))
+		return processHistogramQuery(query, objectIDs, storage)
+	}
 
-		for id := range deviceIDsMap {
+	if query.GroupByObjects {
 
-			objectIDs = append(objectIDs, id)
+		return processGridQuery(query, objectIDs, storage)
 
-		}
+	}
 
-		duration := time.Since(startTime)
+	return processGaugeQuery(query, objectIDs, storage)
+}
 
-		log.Printf("Found %d unique devices for all-devices query in %v", len(objectIDs), duration)
+func processRawDataQuery(query models.Query, objectIDs []uint32, storage *storageEngine.StorageEngine) models.QueryResponse {
 
-	} else {
+	response := models.QueryResponse{
 
-		objectIDs = query.ObjectIDs
+		QueryID: query.QueryID,
 
+		Data: make(map[uint32][]models.DataPoint),
 	}
 
 	var wg sync.WaitGroup
 
 	dataMutex := sync.RWMutex{}
 
-	maxConcurrent := 200 // Maximum number of concurrent device queries
-
-	if len(objectIDs) > 100 {
-
-		// Further reduce concurrency for very large device sets
-		maxConcurrent = 100
-
-	}
-
-	// semaphore channel
-	sem := make(chan struct{}, maxConcurrent)
+	sem := make(chan struct{}, getMaxConcurrent(len(objectIDs)))
 
 	for _, objectID := range objectIDs {
 
@@ -149,6 +108,7 @@ func processQuery(query models.Query) models.QueryResponse {
 			defer func() {
 
 				<-sem
+
 				wg.Done()
 
 			}()
@@ -163,46 +123,11 @@ func processQuery(query models.Query) models.QueryResponse {
 
 			}
 
-			var validPoints []models.DataPoint
-
-			for _, point := range dataPoints {
-
-				if isReasonableValue(point.Value) {
-
-					validPoints = append(validPoints, point)
-
-				} else {
-
-					validPoints = append(validPoints, models.DataPoint{
-
-						Timestamp: point.Timestamp,
-
-						Value: 0.0,
-					})
-				}
-			}
-
-			validPoints = deduplicateDataPoints(validPoints)
-
-			// If no aggregation is specified, return all datapoints
-
-			var processedPoints []models.DataPoint
-
-			if query.Aggregation == "" {
-
-				processedPoints = validPoints
-
-			} else {
-
-				processedPoints = aggregateData(validPoints, query)
-
-			}
-
-			if len(processedPoints) > 0 {
+			if len(dataPoints) > 0 {
 
 				dataMutex.Lock()
 
-				response.Data[objID] = processedPoints
+				response.Data[objID] = deduplicateDataPoints(dataPoints)
 
 				dataMutex.Unlock()
 
@@ -214,6 +139,415 @@ func processQuery(query models.Query) models.QueryResponse {
 	wg.Wait()
 
 	return response
+}
+
+func processHistogramQuery(query models.Query, objectIDs []uint32, storage *storageEngine.StorageEngine) models.QueryResponse {
+
+	response := models.QueryResponse{
+
+		QueryID: query.QueryID,
+
+		Data: make(map[uint32][]models.DataPoint),
+	}
+
+	var wg sync.WaitGroup
+
+	dataMutex := sync.RWMutex{}
+
+	sem := make(chan struct{}, getMaxConcurrent(len(objectIDs)))
+
+	for _, objectID := range objectIDs {
+
+		wg.Add(1)
+
+		sem <- struct{}{}
+
+		go func(objID uint32) {
+
+			defer func() {
+
+				<-sem
+
+				wg.Done()
+
+			}()
+
+			dataPoints, err := processObjectData(storage, objID, query)
+
+			if err != nil {
+
+				log.Printf("Error processing object %d: %v", objID, err)
+
+				return
+
+			}
+
+			if len(dataPoints) > 0 {
+
+				histogramPoints := generateHistogram(deduplicateDataPoints(dataPoints), int(query.Interval))
+
+				if len(histogramPoints) > 0 {
+
+					dataMutex.Lock()
+
+					response.Data[objID] = histogramPoints
+
+					dataMutex.Unlock()
+				}
+
+			}
+
+		}(objectID)
+	}
+
+	wg.Wait()
+
+	return response
+}
+
+func processGroupedHistogramQuery(query models.Query, objectIDs []uint32, storage *storageEngine.StorageEngine) models.QueryResponse {
+
+	// First collect all data points
+	allPoints := make([]models.DataPoint, 0)
+
+	var wg sync.WaitGroup
+
+	var dataMutex sync.RWMutex
+
+	sem := make(chan struct{}, getMaxConcurrent(len(objectIDs)))
+
+	for _, objectID := range objectIDs {
+
+		wg.Add(1)
+
+		sem <- struct{}{}
+
+		go func(objID uint32) {
+
+			defer func() {
+
+				<-sem
+
+				wg.Done()
+
+			}()
+
+			dataPoints, err := processObjectData(storage, objID, query)
+
+			if err != nil {
+
+				log.Printf("Error processing object %d: %v", objID, err)
+
+				return
+
+			}
+
+			if len(dataPoints) > 0 {
+
+				dataMutex.Lock()
+
+				allPoints = append(allPoints, dataPoints...)
+
+				dataMutex.Unlock()
+
+			}
+
+		}(objectID)
+
+	}
+
+	wg.Wait()
+
+	histogramPoints := generateHistogram(deduplicateDataPoints(allPoints), int(query.Interval))
+
+	return models.QueryResponse{
+
+		QueryID: query.QueryID,
+
+		Data: map[uint32][]models.DataPoint{
+
+			0: histogramPoints,
+		},
+	}
+
+}
+
+func processGridQuery(query models.Query, objectIDs []uint32, storage *storageEngine.StorageEngine) models.QueryResponse {
+
+	response := models.QueryResponse{
+
+		QueryID: query.QueryID,
+
+		Data: make(map[uint32][]models.DataPoint),
+	}
+
+	var wg sync.WaitGroup
+
+	dataMutex := sync.RWMutex{}
+
+	sem := make(chan struct{}, getMaxConcurrent(len(objectIDs)))
+
+	for _, objectID := range objectIDs {
+
+		wg.Add(1)
+
+		sem <- struct{}{}
+
+		go func(objID uint32) {
+
+			defer func() {
+
+				<-sem
+
+				wg.Done()
+
+			}()
+
+			dataPoints, err := processObjectData(storage, objID, query)
+
+			if err != nil {
+
+				log.Printf("Error processing object %d: %v", objID, err)
+
+				return
+
+			}
+
+			if len(dataPoints) > 0 {
+
+				aggregatedPoints := aggregateDataPoints(deduplicateDataPoints(dataPoints), query.Aggregation)
+
+				if len(aggregatedPoints) > 0 {
+
+					dataMutex.Lock()
+
+					response.Data[objID] = aggregatedPoints
+
+					dataMutex.Unlock()
+
+				}
+
+			}
+
+		}(objectID)
+
+	}
+
+	wg.Wait()
+
+	return response
+}
+
+func processGaugeQuery(query models.Query, objectIDs []uint32, storage *storageEngine.StorageEngine) models.QueryResponse {
+
+	response := models.QueryResponse{
+
+		QueryID: query.QueryID,
+
+		Data: make(map[uint32][]models.DataPoint),
+	}
+
+	var wg sync.WaitGroup
+
+	dataMutex := sync.RWMutex{}
+
+	sem := make(chan struct{}, getMaxConcurrent(len(objectIDs)))
+
+	for _, objectID := range objectIDs {
+
+		wg.Add(1)
+
+		sem <- struct{}{}
+
+		go func(objID uint32) {
+
+			defer func() {
+
+				<-sem
+
+				wg.Done()
+
+			}()
+
+			dataPoints, err := processObjectData(storage, objID, query)
+
+			if err != nil {
+
+				log.Printf("Error processing object %d: %v", objID, err)
+
+				return
+
+			}
+
+			if len(dataPoints) > 0 {
+
+				gaugePoints := generateGauge(deduplicateDataPoints(dataPoints), 30) // Default 30-second intervals
+
+				if len(gaugePoints) > 0 {
+
+					dataMutex.Lock()
+
+					response.Data[objID] = gaugePoints
+
+					dataMutex.Unlock()
+
+				}
+
+			}
+
+		}(objectID)
+
+	}
+
+	wg.Wait()
+
+	return response
+}
+
+func processAggregationQuery(query models.Query, objectIDs []uint32, storage *storageEngine.StorageEngine) models.QueryResponse {
+
+	response := models.QueryResponse{
+
+		QueryID: query.QueryID,
+
+		Data: make(map[uint32][]models.DataPoint),
+	}
+
+	var wg sync.WaitGroup
+
+	dataMutex := sync.RWMutex{}
+
+	sem := make(chan struct{}, getMaxConcurrent(len(objectIDs)))
+
+	for _, objectID := range objectIDs {
+
+		wg.Add(1)
+
+		sem <- struct{}{}
+
+		go func(objID uint32) {
+
+			defer func() {
+
+				<-sem
+
+				wg.Done()
+
+			}()
+
+			dataPoints, err := processObjectData(storage, objID, query)
+
+			if err != nil {
+
+				log.Printf("Error processing object %d: %v", objID, err)
+
+				return
+
+			}
+
+			if len(dataPoints) > 0 {
+
+				aggregatedPoints := aggregateDataPoints(deduplicateDataPoints(dataPoints), query.Aggregation)
+
+				if len(aggregatedPoints) > 0 {
+
+					dataMutex.Lock()
+
+					response.Data[objID] = aggregatedPoints
+
+					dataMutex.Unlock()
+
+				}
+
+			}
+
+		}(objectID)
+
+	}
+
+	wg.Wait()
+
+	return response
+}
+
+func getMaxConcurrent(numObjects int) int {
+
+	if numObjects > 100 {
+
+		return 100
+
+	}
+
+	return 200
+}
+
+func getObjectIDs(query models.Query, storage *storageEngine.StorageEngine) []uint32 {
+
+	if len(query.ObjectIDs) > 0 {
+
+		return query.ObjectIDs
+
+	}
+
+	// Get all device IDs
+	deviceIDsMap := make(map[uint32]bool)
+
+	fromTime := time.Unix(int64(query.From), 0)
+
+	toTime := time.Unix(int64(query.To), 0)
+
+	for day := fromTime; !day.After(toTime); day = day.AddDate(0, 0, 1) {
+
+		dateStr := day.Format("2006/01/02")
+
+		counterPath := filepath.Join(
+			utils.GetStoragePath(),
+			dateStr,
+			fmt.Sprintf("counter_%d", query.CounterId),
+		)
+
+		if _, err := os.Stat(counterPath); os.IsNotExist(err) {
+
+			continue
+
+		}
+
+		if err := storage.SetStoragePath(counterPath); err != nil {
+
+			log.Printf("Error setting storage path for date %s: %v", dateStr, err)
+
+			continue
+
+		}
+
+		dayDeviceIDs, err := storage.GetAllDeviceIDs()
+
+		if err != nil {
+
+			log.Printf("Error getting device IDs for date %s: %v", dateStr, err)
+
+			continue
+
+		}
+
+		for _, id := range dayDeviceIDs {
+
+			deviceIDsMap[id] = true
+
+		}
+
+	}
+
+	objectIDs := make([]uint32, 0, len(deviceIDsMap))
+
+	for id := range deviceIDsMap {
+
+		objectIDs = append(objectIDs, id)
+
+	}
+
+	return objectIDs
+
 }
 
 func deduplicateDataPoints(points []models.DataPoint) []models.DataPoint {
@@ -434,22 +768,44 @@ func aggregateData(points []models.DataPoint, query models.Query) []models.DataP
 // readDataForObject reads data for a specific object from storage
 func readDataForObject(storage *storageEngine.StorageEngine, objectID int, fromTime uint32, toTime uint32, counterID uint16) ([]models.DataPoint, error) {
 
+	// Try to get from cache first
+	cache, err := GetCache()
+	if err != nil {
+
+		log.Printf("Failed to initialize cache: %v", err)
+
+	} else {
+
+		if dataPoints, found := cache.Get(uint32(objectID), counterID, fromTime, toTime); found {
+
+			return dataPoints, nil
+
+		}
+
+	}
+
 	var dataPoints []models.DataPoint
 
 	rawDataBlocks, err := storage.Get(objectID)
 
 	if err != nil {
+
 		return nil, fmt.Errorf("failed to get data blocks: %v", err)
+
 	}
 
 	if len(rawDataBlocks) == 0 {
+
 		return dataPoints, nil
+
 	}
 
 	expectedType, err := utils.GetCounterType(counterID)
 
 	if err != nil {
+
 		return nil, fmt.Errorf("failed to get counter type: %v", err)
+
 	}
 
 	var blockWg sync.WaitGroup
@@ -492,9 +848,17 @@ func readDataForObject(storage *storageEngine.StorageEngine, objectID int, fromT
 			}
 
 		}(blockData)
+
 	}
 
 	blockWg.Wait()
+
+	// Store in cache if we have data and cache is available
+	if cache != nil && len(dataPoints) > 0 {
+
+		cache.Set(uint32(objectID), counterID, fromTime, toTime, dataPoints)
+
+	}
 
 	return dataPoints, nil
 }
