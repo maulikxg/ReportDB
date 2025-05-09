@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"go.uber.org/zap"
 	"log"
 	"packx/models"
 	"packx/storageEngine"
-	"packx/utils"
+	. "packx/utils"
 	"path/filepath"
 	"strconv"
 	"sync"
@@ -23,7 +24,9 @@ func writer(writersChannel <-chan WriteObjectWiseBatch, storageEn *storageEngine
 
 	for dataBatch := range writersChannel {
 
-		log.Printf("Writer received batch for ObjectId: %d, CounterId: %d, Count: %d\n", dataBatch.ObjectId, dataBatch.CounterId, len(dataBatch.Values))
+		//log.Printf("Writer received batch for ObjectId: %d, CounterId: %d, Count: %d\n", dataBatch.ObjectId, dataBatch.CounterId, len(dataBatch.Values))
+
+		Logger.Info("Writer received batch for ObjectId", zap.Uint32("object_id", dataBatch.ObjectId), zap.Uint16("counter_id", dataBatch.CounterId), zap.Int("count", len(dataBatch.Values)))
 
 		for _, dp := range dataBatch.Values {
 
@@ -45,7 +48,7 @@ func writer(writersChannel <-chan WriteObjectWiseBatch, storageEn *storageEngine
 
 			counterPath := filepath.Join(
 
-				utils.GetStoragePath(),
+				GetStoragePath(),
 
 				dateStr,
 
@@ -55,7 +58,9 @@ func writer(writersChannel <-chan WriteObjectWiseBatch, storageEn *storageEngine
 			// Set storage path for this write
 			if err := storageEn.SetStoragePath(counterPath); err != nil {
 
-				log.Printf("Error setting storage path for ObjectId %d: %v", dataBatch.ObjectId, err)
+				//log.Printf("Error setting storage path for ObjectId %d: %v", dataBatch.ObjectId, err)
+
+				Logger.Info("Error setting storage path for ObjectId", zap.Uint32("object_id", dataBatch.ObjectId), zap.Error(err))
 
 				continue
 			}
@@ -65,7 +70,9 @@ func writer(writersChannel <-chan WriteObjectWiseBatch, storageEn *storageEngine
 
 			if err != nil {
 
-				log.Printf("Error serializing metric for ObjectId %d: %v", dataBatch.ObjectId, err)
+				//log.Printf("Error serializing metric for ObjectId %d: %v", dataBatch.ObjectId, err)
+
+				Logger.Info("Error serializing metric for ObjectId", zap.Uint32("object_id", dataBatch.ObjectId), zap.Error(err))
 
 				continue
 
@@ -91,8 +98,10 @@ func writer(writersChannel <-chan WriteObjectWiseBatch, storageEn *storageEngine
 }
 
 func serializeMetric(metric models.Metric) ([]byte, error) {
+
 	// Validate the metric value type
-	log.Println(metric)
+	//log.Println(metric)
+	Logger.Info("metric", zap.Uint32("object_id", metric.ObjectID), zap.Uint16("counter_id", metric.CounterId), zap.Int64("timestamp", int64(metric.Timestamp)), zap.Any("value", metric.Value))
 
 	if err := ValidateMetricValueType(&metric); err != nil {
 		return nil, err
@@ -100,13 +109,17 @@ func serializeMetric(metric models.Metric) ([]byte, error) {
 
 	buf := new(bytes.Buffer)
 
-	// Write timestamp first (this is important for the storage engine)
+	// Write timestamp first
 	if err := binary.Write(buf, binary.LittleEndian, metric.Timestamp); err != nil {
 		return nil, fmt.Errorf("failed to write Timestamp: %v", err)
+
+		//return nil, Logger.Error("failed to write Timestamp", zap.Error(err))
+
 	}
 
 	// Get expected type for this counter
-	expectedType, err := utils.GetCounterType(metric.CounterId)
+	expectedType, err := GetCounterType(metric.CounterId)
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to get counter type: %v", err)
 	}
@@ -118,37 +131,59 @@ func serializeMetric(metric models.Metric) ([]byte, error) {
 
 	// Write the value based on its type
 	switch v := metric.Value.(type) {
+
 	case int, int32, int64:
+
 		var val int64
+
 		switch vt := v.(type) {
+
 		case int:
 			val = int64(vt)
+
 		case int32:
 			val = int64(vt)
+
 		case int64:
 			val = vt
+
 		}
+
 		if err := binary.Write(buf, binary.LittleEndian, val); err != nil {
+
 			return nil, fmt.Errorf("failed to write int value: %v", err)
+
 		}
 
 	case float32, float64:
+
 		var val float64
+
 		switch vt := v.(type) {
+
 		case float32:
 			val = float64(vt)
+
 		case float64:
 			val = vt
+
 		}
+
 		if err := binary.Write(buf, binary.LittleEndian, val); err != nil {
+
 			return nil, fmt.Errorf("failed to write float value: %v", err)
+
 		}
 
 	case string:
+
 		// Write string length first
 		strLen := uint32(len(v))
+
 		if err := binary.Write(buf, binary.LittleEndian, strLen); err != nil {
+
 			return nil, fmt.Errorf("failed to write string length: %v", err)
+
 		}
 		// Write string data
 		if _, err := buf.WriteString(v); err != nil {
@@ -156,6 +191,7 @@ func serializeMetric(metric models.Metric) ([]byte, error) {
 		}
 
 	default:
+
 		return nil, fmt.Errorf("unsupported value type: %T", v)
 	}
 
@@ -164,7 +200,7 @@ func serializeMetric(metric models.Metric) ([]byte, error) {
 
 func ValidateMetricValueType(metric *models.Metric) error {
 
-	expectedType, err := utils.GetCounterType(metric.CounterId)
+	expectedType, err := GetCounterType(metric.CounterId)
 
 	if err != nil {
 
@@ -174,7 +210,7 @@ func ValidateMetricValueType(metric *models.Metric) error {
 
 	switch expectedType {
 
-	case utils.TypeInt:
+	case TypeInt:
 
 		switch v := metric.Value.(type) {
 
@@ -202,7 +238,7 @@ func ValidateMetricValueType(metric *models.Metric) error {
 
 		}
 
-	case utils.TypeFloat:
+	case TypeFloat:
 
 		switch v := metric.Value.(type) {
 
@@ -230,7 +266,7 @@ func ValidateMetricValueType(metric *models.Metric) error {
 
 		}
 
-	case utils.TypeString:
+	case TypeString:
 
 		switch v := metric.Value.(type) {
 

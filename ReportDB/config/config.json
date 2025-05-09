@@ -8,6 +8,7 @@
     "max_blocks_per_device": 1000,
     "buffred_chan_size": 1000,
     "storage_path": "/home/maulikpuri/Desktop/v1/ReportDB/storageData",
+    "IsProductionEnvironment" : false,
     "ClinetqueryResponserSenderSocket" : 8009,
     "ClientqueryRequestReceiveSocker" : 8008,
     "pollerDataPullSocket" :5556

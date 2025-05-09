@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
 	_ "net/http/pprof"
 	. "packx/DB"
 	. "packx/models"
@@ -26,29 +25,21 @@ func main() {
 
 	if err != nil {
 
-		log.Println("Error loading config:", err)
+		log.Fatal("Error loading config:", err)
 
 		return
 
 	}
 
-	//query := Query{
-	//	QueryID: 1,
-	//
-	//	//From: uint32(time.Now().Add(-5 * time.Second).Unix()),
-	//	//
-	//	//To: uint32(time.Now().Unix()),
-	//
-	//	From: 1745400861,
-	//
-	//	To: 1745400889,
-	//
-	//	ObjectIDs: []uint32{1},
-	//
-	//	CounterId: 1,
-	//
-	//	Aggregation: "avg",
-	//}
+	err = InitLogger() // loading all Logger configurations
+
+	if err != nil {
+
+		log.Fatal("Error loading logger:", err)
+
+		return
+
+	}
 
 	pollData = make(chan Metric, GetBufferredChanSize()) // for the Polling data making channel
 
@@ -62,64 +53,7 @@ func main() {
 
 	globalShutDownWg.Add(4)
 
-	// Start the pull server
 	go PullServer(pollData)
-
-	// Start polling
-	//go PollData(&wg)
-
-	// Forward data from pollData to dataWriteCh
-	//go func() {
-	//
-	//	defer globalShutDownWg.Done()
-	//
-	//	buffer := make([]Metric, 0, 10) // Buffer to accumulate metrics
-	//
-	//	ticker := time.NewTicker(1 * time.Second)
-	//
-	//	defer ticker.Stop()
-	//
-	//	for {
-	//
-	//		select {
-	//
-	//		case metric, ok := <-pollData:
-	//
-	//			if !ok {
-	//
-	//				// Channel closed, flush remaining buffer
-	//				if len(buffer) > 0 {
-	//
-	//					dataWriteCh <- buffer
-	//
-	//				}
-	//
-	//				return
-	//			}
-	//
-	//			buffer = append(buffer, metric)
-	//
-	//			if len(buffer) >= 10 { // Flush when buffer is full
-	//
-	//				dataWriteCh <- buffer
-	//
-	//				buffer = make([]Metric, 0, 10)
-	//
-	//			}
-	//
-	//		case <-ticker.C:
-	//
-	//			// Flush buffer periodically even if not full
-	//			if len(buffer) > 0 {
-	//
-	//				dataWriteCh <- buffer
-	//
-	//				buffer = make([]Metric, 0, 10)
-	//
-	//			}
-	//		}
-	//	}
-	//}()
 
 	go InitDB(dataWriteCh, queryReceiveCh, queryResponseCh, &globalShutDownWg)
 
@@ -130,21 +64,8 @@ func main() {
 	go InitQueryResponser(queryResponseCh, &globalShutDownWg)
 
 	go InitProfiling()
-	//queryReceiveCh <- query
 
-	// Wait for all goroutines to finish
 	globalShutDownWg.Wait()
 
 	select {}
-}
-
-func InitProfiling() {
-
-	err := http.ListenAndServe("localhost:1234", nil)
-
-	if err != nil {
-
-		log.Println("Error starting profiling:", err)
-
-	}
 }

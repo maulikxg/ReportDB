@@ -1,0 +1,427 @@
+2025-05-09T15:33:02.180+0530	INFO	DB/db.go:36	Storage directory checked/created	{"path": "/home/maulikpuri/Desktop/v1/ReportDB/src/storage"}
+2025-05-09T15:33:02.180+0530	INFO	DB/db.go:67	DB Initialized. Waiting for Writer Handler and Query Engine to stop...
+2025-05-09T15:33:20.217+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 2, "count": 1}
+2025-05-09T15:33:20.217+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 1, "count": 1}
+2025-05-09T15:33:20.217+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 2, "count": 1}
+2025-05-09T15:33:20.217+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 2, "count": 1}
+2025-05-09T15:33:20.217+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 2, "count": 1}
+2025-05-09T15:33:20.217+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 1, "count": 1}
+2025-05-09T15:33:20.217+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 1, "count": 1}
+2025-05-09T15:33:20.217+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 1, "count": 1}
+2025-05-09T15:33:20.217+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 2, "timestamp": 1746784999, "value": 1562}
+2025-05-09T15:33:20.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 1, "timestamp": 1746784999, "value": 11.9}
+2025-05-09T15:33:20.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 2, "timestamp": 1746784999, "value": 7544}
+2025-05-09T15:33:20.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 2, "timestamp": 1746784999, "value": 8710}
+2025-05-09T15:33:20.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 2, "timestamp": 1746784999, "value": 5897}
+2025-05-09T15:33:20.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 1, "timestamp": 1746784999, "value": 1.5}
+2025-05-09T15:33:20.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 1, "timestamp": 1746784999, "value": 21.3}
+2025-05-09T15:33:20.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 1, "timestamp": 1746784999, "value": 59.3}
+2025-05-09T15:33:24.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 2, "count": 1}
+2025-05-09T15:33:24.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 2, "count": 1}
+2025-05-09T15:33:24.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 2, "timestamp": 1746785002, "value": 8621}
+2025-05-09T15:33:24.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 1, "count": 1}
+2025-05-09T15:33:24.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 1, "timestamp": 1746785002, "value": 14}
+2025-05-09T15:33:24.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 2, "timestamp": 1746785002, "value": 7546}
+2025-05-09T15:33:24.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 1, "count": 1}
+2025-05-09T15:33:24.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 1, "timestamp": 1746785002, "value": 11.4}
+2025-05-09T15:33:24.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 2, "count": 1}
+2025-05-09T15:33:24.219+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 2, "timestamp": 1746785002, "value": 5875}
+2025-05-09T15:33:24.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 1, "count": 1}
+2025-05-09T15:33:24.219+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 1, "timestamp": 1746785002, "value": 22.3}
+2025-05-09T15:33:26.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 1, "count": 1}
+2025-05-09T15:33:26.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 1, "timestamp": 1746785005, "value": 3.4}
+2025-05-09T15:33:26.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 1, "count": 1}
+2025-05-09T15:33:26.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 1, "timestamp": 1746785005, "value": 14.6}
+2025-05-09T15:33:26.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 2, "count": 1}
+2025-05-09T15:33:26.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 2, "timestamp": 1746785005, "value": 8623}
+2025-05-09T15:33:26.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 2, "count": 1}
+2025-05-09T15:33:26.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 2, "timestamp": 1746785005, "value": 5879}
+2025-05-09T15:33:26.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 1, "count": 1}
+2025-05-09T15:33:26.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 1, "timestamp": 1746785005, "value": 15.3}
+2025-05-09T15:33:26.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 2, "count": 1}
+2025-05-09T15:33:26.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 2, "timestamp": 1746785005, "value": 7529}
+2025-05-09T15:33:28.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 2, "count": 1}
+2025-05-09T15:33:28.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 2, "timestamp": 1746785008, "value": 1579}
+2025-05-09T15:33:28.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 1, "count": 1}
+2025-05-09T15:33:28.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 1, "timestamp": 1746785008, "value": 49.1}
+2025-05-09T15:33:30.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 1, "count": 1}
+2025-05-09T15:33:30.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 1, "count": 2}
+2025-05-09T15:33:30.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 2, "count": 1}
+2025-05-09T15:33:30.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 1, "timestamp": 1746785008, "value": 32.3}
+2025-05-09T15:33:30.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 2, "timestamp": 1746785008, "value": 7501}
+2025-05-09T15:33:30.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 2, "count": 1}
+2025-05-09T15:33:30.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 2, "timestamp": 1746785008, "value": 8625}
+2025-05-09T15:33:30.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 2, "count": 2}
+2025-05-09T15:33:30.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 2, "timestamp": 1746785008, "value": 1575}
+2025-05-09T15:33:30.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 1, "timestamp": 1746785008, "value": 47.4}
+2025-05-09T15:33:30.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 1, "count": 1}
+2025-05-09T15:33:30.219+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 1, "timestamp": 1746785008, "value": 2.7}
+2025-05-09T15:33:30.219+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 2, "timestamp": 1746785008, "value": 1562}
+2025-05-09T15:33:30.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 2, "count": 1}
+2025-05-09T15:33:30.219+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 2, "timestamp": 1746785008, "value": 5907}
+2025-05-09T15:33:30.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 1, "count": 1}
+2025-05-09T15:33:30.219+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 1, "timestamp": 1746785008, "value": 3.2}
+2025-05-09T15:33:30.219+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 1, "timestamp": 1746785008, "value": 2.9}
+2025-05-09T15:33:32.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 2, "count": 1}
+2025-05-09T15:33:32.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 2, "count": 1}
+2025-05-09T15:33:32.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 1, "count": 1}
+2025-05-09T15:33:32.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 2, "timestamp": 1746785011, "value": 5892}
+2025-05-09T15:33:32.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 1, "timestamp": 1746785011, "value": 3.7}
+2025-05-09T15:33:32.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 2, "count": 1}
+2025-05-09T15:33:32.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 2, "timestamp": 1746785011, "value": 1565}
+2025-05-09T15:33:32.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 2, "timestamp": 1746785011, "value": 7506}
+2025-05-09T15:33:32.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 2, "count": 1}
+2025-05-09T15:33:32.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 2, "timestamp": 1746785011, "value": 8626}
+2025-05-09T15:33:32.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 1, "count": 1}
+2025-05-09T15:33:32.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 1, "count": 1}
+2025-05-09T15:33:32.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 1, "timestamp": 1746785011, "value": 16.7}
+2025-05-09T15:33:32.219+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 1, "timestamp": 1746785011, "value": 15.4}
+2025-05-09T15:33:36.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 2, "count": 1}
+2025-05-09T15:33:36.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 1, "count": 1}
+2025-05-09T15:33:36.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 2, "count": 1}
+2025-05-09T15:33:36.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 2, "count": 1}
+2025-05-09T15:33:36.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 1, "count": 1}
+2025-05-09T15:33:36.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 1, "count": 1}
+2025-05-09T15:33:36.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 1, "timestamp": 1746785014, "value": 2.9}
+2025-05-09T15:33:36.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 2, "timestamp": 1746785015, "value": 1563}
+2025-05-09T15:33:36.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 2, "timestamp": 1746785014, "value": 5932}
+2025-05-09T15:33:36.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 1, "timestamp": 1746785014, "value": 7.7}
+2025-05-09T15:33:36.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 2, "count": 1}
+2025-05-09T15:33:36.219+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 2, "timestamp": 1746785014, "value": 8624}
+2025-05-09T15:33:36.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 1, "count": 1}
+2025-05-09T15:33:36.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 2, "timestamp": 1746785014, "value": 7491}
+2025-05-09T15:33:36.219+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 1, "timestamp": 1746785015, "value": 3.1}
+2025-05-09T15:33:36.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 1, "timestamp": 1746785014, "value": 4.2}
+2025-05-09T15:33:38.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 1, "count": 1}
+2025-05-09T15:33:38.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 1, "count": 1}
+2025-05-09T15:33:38.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 2, "count": 1}
+2025-05-09T15:33:38.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 2, "count": 1}
+2025-05-09T15:33:38.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 2, "count": 1}
+2025-05-09T15:33:38.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 1, "count": 1}
+2025-05-09T15:33:38.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 1, "timestamp": 1746785017, "value": 19.4}
+2025-05-09T15:33:38.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 2, "timestamp": 1746785017, "value": 1564}
+2025-05-09T15:33:38.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 1, "count": 1}
+2025-05-09T15:33:38.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 2, "timestamp": 1746785017, "value": 8601}
+2025-05-09T15:33:38.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 1, "timestamp": 1746785017, "value": 12.3}
+2025-05-09T15:33:38.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 2, "count": 1}
+2025-05-09T15:33:38.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 1, "timestamp": 1746785017, "value": 12.5}
+2025-05-09T15:33:38.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 2, "timestamp": 1746785017, "value": 7488}
+2025-05-09T15:33:38.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 1, "timestamp": 1746785017, "value": 30}
+2025-05-09T15:33:38.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 2, "timestamp": 1746785017, "value": 5928}
+2025-05-09T15:33:42.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 2, "count": 1}
+2025-05-09T15:33:42.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 2, "count": 1}
+2025-05-09T15:33:42.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 2, "count": 1}
+2025-05-09T15:33:42.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 1, "count": 1}
+2025-05-09T15:33:42.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 2, "timestamp": 1746785020, "value": 5911}
+2025-05-09T15:33:42.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 1, "count": 1}
+2025-05-09T15:33:42.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 1, "count": 1}
+2025-05-09T15:33:42.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 1, "timestamp": 1746785020, "value": 18.3}
+2025-05-09T15:33:42.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 2, "timestamp": 1746785020, "value": 1561}
+2025-05-09T15:33:42.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 1, "count": 1}
+2025-05-09T15:33:42.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 2, "count": 1}
+2025-05-09T15:33:42.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 2, "timestamp": 1746785020, "value": 8606}
+2025-05-09T15:33:42.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 2, "timestamp": 1746785020, "value": 7479}
+2025-05-09T15:33:42.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 1, "timestamp": 1746785020, "value": 7.8}
+2025-05-09T15:33:42.219+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 1, "timestamp": 1746785020, "value": 1.5}
+2025-05-09T15:33:42.219+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 1, "timestamp": 1746785020, "value": 22.1}
+2025-05-09T15:33:44.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 2, "count": 1}
+2025-05-09T15:33:44.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 1, "count": 1}
+2025-05-09T15:33:44.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 1, "count": 1}
+2025-05-09T15:33:44.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 2, "count": 1}
+2025-05-09T15:33:44.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 2, "count": 1}
+2025-05-09T15:33:44.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 1, "timestamp": 1746785023, "value": 8.5}
+2025-05-09T15:33:44.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 2, "timestamp": 1746785023, "value": 1562}
+2025-05-09T15:33:44.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 2, "timestamp": 1746785023, "value": 5922}
+2025-05-09T15:33:44.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 1, "timestamp": 1746785023, "value": 2.1}
+2025-05-09T15:33:44.219+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 2, "timestamp": 1746785023, "value": 7478}
+2025-05-09T15:33:44.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 2, "count": 1}
+2025-05-09T15:33:44.219+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 2, "timestamp": 1746785023, "value": 8612}
+2025-05-09T15:33:44.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 1, "count": 1}
+2025-05-09T15:33:44.219+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 1, "timestamp": 1746785023, "value": 1.6}
+2025-05-09T15:33:44.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 1, "count": 1}
+2025-05-09T15:33:44.219+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 1, "timestamp": 1746785023, "value": 21.5}
+2025-05-09T15:33:48.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 2, "count": 1}
+2025-05-09T15:33:48.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 1, "count": 1}
+2025-05-09T15:33:48.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 1, "count": 1}
+2025-05-09T15:33:48.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 1, "count": 1}
+2025-05-09T15:33:48.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 1, "count": 1}
+2025-05-09T15:33:48.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 2, "timestamp": 1746785026, "value": 5892}
+2025-05-09T15:33:48.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 1, "timestamp": 1746785026, "value": 25}
+2025-05-09T15:33:48.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 2, "count": 1}
+2025-05-09T15:33:48.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 1, "timestamp": 1746785026, "value": 14.1}
+2025-05-09T15:33:48.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 2, "timestamp": 1746785026, "value": 8605}
+2025-05-09T15:33:48.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 2, "count": 1}
+2025-05-09T15:33:48.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 1, "timestamp": 1746785026, "value": 0}
+2025-05-09T15:33:48.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 2, "count": 1}
+2025-05-09T15:33:48.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 1, "timestamp": 1746785026, "value": 2.7}
+2025-05-09T15:33:48.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 2, "timestamp": 1746785026, "value": 1562}
+2025-05-09T15:33:48.219+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 2, "timestamp": 1746785026, "value": 7475}
+2025-05-09T15:33:50.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 2, "count": 1}
+2025-05-09T15:33:50.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 1, "count": 1}
+2025-05-09T15:33:50.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 1, "count": 1}
+2025-05-09T15:33:50.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 1, "timestamp": 1746785029, "value": 6.3}
+2025-05-09T15:33:50.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 1, "timestamp": 1746785029, "value": 6.9}
+2025-05-09T15:33:50.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 2, "count": 1}
+2025-05-09T15:33:50.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 2, "timestamp": 1746785029, "value": 7472}
+2025-05-09T15:33:50.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 1, "count": 1}
+2025-05-09T15:33:50.219+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 2, "timestamp": 1746785029, "value": 8600}
+2025-05-09T15:33:50.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 2, "count": 1}
+2025-05-09T15:33:50.219+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 1, "timestamp": 1746785029, "value": 4.4}
+2025-05-09T15:33:50.219+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 2, "timestamp": 1746785029, "value": 5922}
+2025-05-09T15:33:52.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 2, "count": 2}
+2025-05-09T15:33:52.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 1, "count": 2}
+2025-05-09T15:33:52.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 2, "timestamp": 1746785030, "value": 1566}
+2025-05-09T15:33:52.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 1, "timestamp": 1746785030, "value": 11.9}
+2025-05-09T15:33:52.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 2, "timestamp": 1746785032, "value": 1565}
+2025-05-09T15:33:52.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 1, "timestamp": 1746785032, "value": 4.8}
+2025-05-09T15:33:54.217+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 2, "count": 1}
+2025-05-09T15:33:54.217+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 2, "count": 1}
+2025-05-09T15:33:54.217+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 1, "count": 1}
+2025-05-09T15:33:54.217+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 1, "count": 1}
+2025-05-09T15:33:54.217+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 2, "count": 1}
+2025-05-09T15:33:54.217+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 1, "count": 1}
+2025-05-09T15:33:54.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 2, "timestamp": 1746785032, "value": 7472}
+2025-05-09T15:33:54.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 1, "timestamp": 1746785032, "value": 16.8}
+2025-05-09T15:33:54.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 2, "timestamp": 1746785032, "value": 5914}
+2025-05-09T15:33:54.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 2, "timestamp": 1746785032, "value": 8588}
+2025-05-09T15:33:54.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 1, "timestamp": 1746785032, "value": 8.9}
+2025-05-09T15:33:54.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 1, "timestamp": 1746785032, "value": 6.2}
+2025-05-09T15:33:56.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 2, "count": 1}
+2025-05-09T15:33:56.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 1, "count": 1}
+2025-05-09T15:33:56.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 2, "count": 1}
+2025-05-09T15:33:56.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 2, "timestamp": 1746785035, "value": 8603}
+2025-05-09T15:33:56.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 1, "timestamp": 1746785035, "value": 5.5}
+2025-05-09T15:33:56.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 2, "timestamp": 1746785035, "value": 7502}
+2025-05-09T15:33:56.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 1, "count": 1}
+2025-05-09T15:33:56.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 1, "count": 1}
+2025-05-09T15:33:56.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 1, "timestamp": 1746785035, "value": 7.3}
+2025-05-09T15:33:56.218+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 2, "count": 1}
+2025-05-09T15:33:56.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 1, "timestamp": 1746785035, "value": 5.6}
+2025-05-09T15:33:56.218+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 2, "timestamp": 1746785035, "value": 5911}
+2025-05-09T15:33:58.217+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 2, "count": 1}
+2025-05-09T15:33:58.217+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 1, "count": 1}
+2025-05-09T15:33:58.217+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 2, "timestamp": 1746785036, "value": 1563}
+2025-05-09T15:33:58.217+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 1, "timestamp": 1746785036, "value": 3}
+2025-05-09T16:29:21.822+0530	INFO	DB/db.go:36	Storage directory checked/created	{"path": "/home/maulikpuri/Desktop/v1/ReportDB/src/storage"}
+2025-05-09T16:29:21.823+0530	INFO	DB/db.go:67	DB Initialized. Waiting for Writer Handler and Query Engine to stop...
+2025-05-09T16:29:23.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 2, "count": 12}
+2025-05-09T16:29:23.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 2, "count": 12}
+2025-05-09T16:29:23.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 1, "count": 12}
+2025-05-09T16:29:23.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 2, "count": 13}
+2025-05-09T16:29:23.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 2, "timestamp": 1746787131, "value": 7232}
+2025-05-09T16:29:23.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 2, "count": 13}
+2025-05-09T16:29:23.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 1, "timestamp": 1746787131, "value": 10.4}
+2025-05-09T16:29:23.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 1, "count": 13}
+2025-05-09T16:29:23.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 1, "count": 13}
+2025-05-09T16:29:23.830+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 2, "timestamp": 1746787131, "value": 6150}
+2025-05-09T16:29:23.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 1, "count": 13}
+2025-05-09T16:29:23.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 2, "timestamp": 1746787131, "value": 8649}
+2025-05-09T16:29:23.830+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 2, "timestamp": 1746787131, "value": 1566}
+2025-05-09T16:29:23.830+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 1, "timestamp": 1746787131, "value": 16}
+2025-05-09T16:29:23.830+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 1, "timestamp": 1746787131, "value": 8.5}
+2025-05-09T16:29:23.830+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 1, "timestamp": 1746787131, "value": 3}
+2025-05-09T16:29:23.830+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 2, "timestamp": 1746787134, "value": 7231}
+2025-05-09T16:29:23.830+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 2, "timestamp": 1746787134, "value": 6168}
+2025-05-09T16:29:23.831+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 2, "timestamp": 1746787134, "value": 8636}
+2025-05-09T16:29:23.831+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 1, "timestamp": 1746787134, "value": 20.5}
+2025-05-09T16:29:23.833+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 2, "timestamp": 1746787137, "value": 8643}
+2025-05-09T16:29:23.833+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 1, "timestamp": 1746787134, "value": 3.5}
+2025-05-09T16:29:23.833+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 2, "timestamp": 1746787134, "value": 1563}
+2025-05-09T16:29:23.833+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 2, "timestamp": 1746787140, "value": 8641}
+2025-05-09T16:29:23.833+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 1, "timestamp": 1746787137, "value": 0.7}
+2025-05-09T16:29:23.834+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 2, "timestamp": 1746787137, "value": 7153}
+2025-05-09T16:29:23.834+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 1, "timestamp": 1746787137, "value": 5.3}
+2025-05-09T16:29:23.834+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 1, "timestamp": 1746787134, "value": 30.2}
+2025-05-09T16:29:23.834+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 2, "timestamp": 1746787140, "value": 7156}
+2025-05-09T16:29:23.834+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 1, "timestamp": 1746787134, "value": 1.6}
+2025-05-09T16:29:23.834+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 1, "timestamp": 1746787140, "value": 7.1}
+2025-05-09T16:29:23.834+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 2, "timestamp": 1746787143, "value": 8649}
+2025-05-09T16:29:23.834+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 1, "timestamp": 1746787140, "value": 11.4}
+2025-05-09T16:29:23.834+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 2, "timestamp": 1746787137, "value": 6103}
+2025-05-09T16:29:23.834+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 2, "timestamp": 1746787146, "value": 8644}
+2025-05-09T16:29:23.834+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 1, "timestamp": 1746787143, "value": 11.7}
+2025-05-09T16:29:23.834+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 2, "timestamp": 1746787137, "value": 1562}
+2025-05-09T16:29:23.834+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 1, "timestamp": 1746787143, "value": 19.5}
+2025-05-09T16:29:23.834+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 1, "timestamp": 1746787146, "value": 6.3}
+2025-05-09T16:29:23.834+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 2, "timestamp": 1746787143, "value": 7152}
+2025-05-09T16:29:23.834+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 1, "timestamp": 1746787137, "value": 16}
+2025-05-09T16:29:23.834+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 2, "timestamp": 1746787146, "value": 7152}
+2025-05-09T16:29:23.834+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 1, "timestamp": 1746787146, "value": 7.7}
+2025-05-09T16:29:23.834+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 1, "timestamp": 1746787149, "value": 4.9}
+2025-05-09T16:29:23.835+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 1, "timestamp": 1746787140, "value": 12.8}
+2025-05-09T16:29:23.835+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 2, "timestamp": 1746787149, "value": 8634}
+2025-05-09T16:29:23.835+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 1, "timestamp": 1746787137, "value": 1.5}
+2025-05-09T16:29:23.835+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 1, "timestamp": 1746787152, "value": 10}
+2025-05-09T16:29:23.835+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 2, "timestamp": 1746787140, "value": 6091}
+2025-05-09T16:29:23.835+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 1, "timestamp": 1746787149, "value": 18.6}
+2025-05-09T16:29:23.835+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 2, "timestamp": 1746787143, "value": 6092}
+2025-05-09T16:29:23.835+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 2, "timestamp": 1746787152, "value": 8651}
+2025-05-09T16:29:23.835+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 2, "timestamp": 1746787149, "value": 7203}
+2025-05-09T16:29:23.835+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 2, "timestamp": 1746787140, "value": 1565}
+2025-05-09T16:29:23.835+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 1, "timestamp": 1746787152, "value": 13}
+2025-05-09T16:29:23.835+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 1, "timestamp": 1746787155, "value": 1.4}
+2025-05-09T16:29:23.835+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 2, "timestamp": 1746787143, "value": 1562}
+2025-05-09T16:29:23.835+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 2, "timestamp": 1746787152, "value": 7218}
+2025-05-09T16:29:23.835+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 1, "timestamp": 1746787155, "value": 20}
+2025-05-09T16:29:23.835+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 2, "timestamp": 1746787146, "value": 1562}
+2025-05-09T16:29:23.835+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 2, "timestamp": 1746787155, "value": 7196}
+2025-05-09T16:29:23.835+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 2, "timestamp": 1746787155, "value": 8648}
+2025-05-09T16:29:23.835+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 1, "timestamp": 1746787143, "value": 14.7}
+2025-05-09T16:29:23.835+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 1, "timestamp": 1746787158, "value": 2.8}
+2025-05-09T16:29:23.836+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 1, "timestamp": 1746787158, "value": 7.9}
+2025-05-09T16:29:23.836+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 2, "timestamp": 1746787158, "value": 7190}
+2025-05-09T16:29:23.836+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 1, "timestamp": 1746787140, "value": 10.9}
+2025-05-09T16:29:23.836+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 2, "timestamp": 1746787158, "value": 8643}
+2025-05-09T16:29:23.836+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 1, "timestamp": 1746787161, "value": 0.7}
+2025-05-09T16:29:23.836+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 2, "timestamp": 1746787146, "value": 6110}
+2025-05-09T16:29:23.836+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 1, "timestamp": 1746787161, "value": 23.8}
+2025-05-09T16:29:23.836+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 1, "timestamp": 1746787164, "value": 0.7}
+2025-05-09T16:29:23.836+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 2, "timestamp": 1746787149, "value": 1562}
+2025-05-09T16:29:23.836+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 1, "timestamp": 1746787146, "value": 11.4}
+2025-05-09T16:29:23.836+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 1, "timestamp": 1746787164, "value": 18.7}
+2025-05-09T16:29:23.836+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 2, "timestamp": 1746787161, "value": 7190}
+2025-05-09T16:29:23.836+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 1, "timestamp": 1746787149, "value": 18.8}
+2025-05-09T16:29:23.836+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 2, "timestamp": 1746787164, "value": 7149}
+2025-05-09T16:29:23.836+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 1, "timestamp": 1746787167, "value": 15.7}
+2025-05-09T16:29:23.836+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 2, "timestamp": 1746787161, "value": 8653}
+2025-05-09T16:29:23.836+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 1, "timestamp": 1746787143, "value": 1.6}
+2025-05-09T16:29:23.836+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 2, "timestamp": 1746787164, "value": 8658}
+2025-05-09T16:29:23.836+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 1, "timestamp": 1746787146, "value": 0}
+2025-05-09T16:29:23.836+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 1, "timestamp": 1746787149, "value": 0}
+2025-05-09T16:29:23.836+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 2, "timestamp": 1746787149, "value": 6116}
+2025-05-09T16:29:23.836+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 2, "timestamp": 1746787152, "value": 6128}
+2025-05-09T16:29:23.836+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 2, "timestamp": 1746787152, "value": 1565}
+2025-05-09T16:29:23.837+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 2, "timestamp": 1746787155, "value": 1566}
+2025-05-09T16:29:23.837+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 1, "timestamp": 1746787152, "value": 5.7}
+2025-05-09T16:29:23.837+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 1, "timestamp": 1746787155, "value": 12.1}
+2025-05-09T16:29:23.837+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 1, "timestamp": 1746787152, "value": 1.6}
+2025-05-09T16:29:23.837+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 1, "timestamp": 1746787155, "value": 4.8}
+2025-05-09T16:29:23.837+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 1, "timestamp": 1746787158, "value": 1.6}
+2025-05-09T16:29:23.837+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 2, "timestamp": 1746787155, "value": 6105}
+2025-05-09T16:29:23.837+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 2, "timestamp": 1746787158, "value": 6240}
+2025-05-09T16:29:23.837+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 2, "timestamp": 1746787158, "value": 1565}
+2025-05-09T16:29:23.837+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 1, "timestamp": 1746787158, "value": 22.8}
+2025-05-09T16:29:23.837+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 1, "timestamp": 1746787161, "value": 0}
+2025-05-09T16:29:23.837+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 2, "timestamp": 1746787161, "value": 6352}
+2025-05-09T16:29:23.837+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 2, "timestamp": 1746787161, "value": 1562}
+2025-05-09T16:29:23.837+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 1, "timestamp": 1746787161, "value": 14}
+2025-05-09T16:29:23.838+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 1, "timestamp": 1746787164, "value": 13.4}
+2025-05-09T16:29:23.838+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 1, "timestamp": 1746787164, "value": 1.6}
+2025-05-09T16:29:23.838+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 1, "timestamp": 1746787167, "value": 9.1}
+2025-05-09T16:29:23.838+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 2, "timestamp": 1746787164, "value": 6247}
+2025-05-09T16:29:23.838+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 2, "timestamp": 1746787167, "value": 6265}
+2025-05-09T16:29:23.838+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 2, "timestamp": 1746787164, "value": 1562}
+2025-05-09T16:29:23.838+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 2, "timestamp": 1746787167, "value": 1566}
+2025-05-09T16:29:23.838+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 1, "timestamp": 1746787167, "value": 7.5}
+2025-05-09T16:29:35.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 2, "count": 1}
+2025-05-09T16:29:35.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 2, "timestamp": 1746788373, "value": 1562}
+2025-05-09T16:29:35.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 2, "count": 1}
+2025-05-09T16:29:35.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 2, "timestamp": 1746788373, "value": 7563}
+2025-05-09T16:29:35.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 1, "count": 1}
+2025-05-09T16:29:35.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 1, "timestamp": 1746788373, "value": 18.7}
+2025-05-09T16:29:35.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 2, "count": 1}
+2025-05-09T16:29:35.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 2, "timestamp": 1746788373, "value": 8680}
+2025-05-09T16:29:35.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 2, "count": 1}
+2025-05-09T16:29:35.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 2, "timestamp": 1746788373, "value": 6560}
+2025-05-09T16:29:35.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 1, "count": 1}
+2025-05-09T16:29:35.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 1, "timestamp": 1746788373, "value": 14}
+2025-05-09T16:29:35.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 1, "count": 1}
+2025-05-09T16:29:35.830+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 1, "timestamp": 1746788373, "value": 13.7}
+2025-05-09T16:29:35.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 1, "count": 1}
+2025-05-09T16:29:35.830+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 1, "timestamp": 1746788373, "value": 0}
+2025-05-09T16:29:37.828+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 2, "count": 1}
+2025-05-09T16:29:37.828+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 1, "count": 1}
+2025-05-09T16:29:37.828+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 2, "timestamp": 1746788376, "value": 1563}
+2025-05-09T16:29:37.828+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 1, "timestamp": 1746788376, "value": 1.6}
+2025-05-09T16:29:37.828+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 2, "count": 1}
+2025-05-09T16:29:37.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 2, "timestamp": 1746788376, "value": 8684}
+2025-05-09T16:29:37.828+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 2, "count": 1}
+2025-05-09T16:29:37.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 2, "timestamp": 1746788376, "value": 6709}
+2025-05-09T16:29:37.828+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 2, "count": 1}
+2025-05-09T16:29:37.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 2, "timestamp": 1746788377, "value": 7556}
+2025-05-09T16:29:37.828+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 1, "count": 1}
+2025-05-09T16:29:37.828+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 1, "count": 1}
+2025-05-09T16:29:37.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 1, "timestamp": 1746788376, "value": 19.4}
+2025-05-09T16:29:37.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 1, "timestamp": 1746788376, "value": 16.5}
+2025-05-09T16:29:37.828+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 1, "count": 1}
+2025-05-09T16:29:37.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 1, "timestamp": 1746788377, "value": 7.1}
+2025-05-09T16:29:41.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 1, "count": 1}
+2025-05-09T16:29:41.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 2, "count": 1}
+2025-05-09T16:29:41.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 2, "count": 1}
+2025-05-09T16:29:41.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 2, "count": 1}
+2025-05-09T16:29:41.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 1, "count": 1}
+2025-05-09T16:29:41.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 2, "timestamp": 1746788379, "value": 7560}
+2025-05-09T16:29:41.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 2, "timestamp": 1746788379, "value": 8662}
+2025-05-09T16:29:41.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 1, "timestamp": 1746788379, "value": 7.3}
+2025-05-09T16:29:41.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 1, "count": 1}
+2025-05-09T16:29:41.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 2, "timestamp": 1746788379, "value": 1566}
+2025-05-09T16:29:41.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 1, "timestamp": 1746788379, "value": 2.9}
+2025-05-09T16:29:41.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 1, "count": 1}
+2025-05-09T16:29:41.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 1, "timestamp": 1746788379, "value": 7.8}
+2025-05-09T16:29:41.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 1, "timestamp": 1746788379, "value": 17.8}
+2025-05-09T16:29:41.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 2, "count": 1}
+2025-05-09T16:29:41.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 2, "timestamp": 1746788379, "value": 6611}
+2025-05-09T16:29:43.828+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 2, "count": 1}
+2025-05-09T16:29:43.828+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 1, "count": 1}
+2025-05-09T16:29:43.828+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 2, "count": 1}
+2025-05-09T16:29:43.828+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 2, "timestamp": 1746788382, "value": 1562}
+2025-05-09T16:29:43.828+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 1, "count": 1}
+2025-05-09T16:29:43.828+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 1, "timestamp": 1746788382, "value": 1.5}
+2025-05-09T16:29:43.828+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 2, "count": 1}
+2025-05-09T16:29:43.828+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 1, "count": 1}
+2025-05-09T16:29:43.828+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 1, "count": 1}
+2025-05-09T16:29:43.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 2, "timestamp": 1746788382, "value": 6594}
+2025-05-09T16:29:43.828+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 2, "count": 1}
+2025-05-09T16:29:43.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 1, "timestamp": 1746788382, "value": 4.5}
+2025-05-09T16:29:43.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 2, "timestamp": 1746788382, "value": 7563}
+2025-05-09T16:29:43.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 2, "timestamp": 1746788382, "value": 8678}
+2025-05-09T16:29:43.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 1, "timestamp": 1746788382, "value": 24.2}
+2025-05-09T16:29:43.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 1, "timestamp": 1746788382, "value": 1.6}
+2025-05-09T16:29:47.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 1, "count": 1}
+2025-05-09T16:29:47.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 2, "count": 1}
+2025-05-09T16:29:47.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 2, "count": 1}
+2025-05-09T16:29:47.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 1, "count": 1}
+2025-05-09T16:29:47.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 2, "count": 1}
+2025-05-09T16:29:47.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 1, "count": 1}
+2025-05-09T16:29:47.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 1, "count": 1}
+2025-05-09T16:29:47.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 2, "timestamp": 1746788385, "value": 6611}
+2025-05-09T16:29:47.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 2, "timestamp": 1746788385, "value": 1562}
+2025-05-09T16:29:47.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 2, "timestamp": 1746788385, "value": 8670}
+2025-05-09T16:29:47.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 1, "timestamp": 1746788385, "value": 32.3}
+2025-05-09T16:29:47.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 1, "timestamp": 1746788385, "value": 14.1}
+2025-05-09T16:29:47.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 1, "timestamp": 1746788385, "value": 0}
+2025-05-09T16:29:47.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 1, "timestamp": 1746788385, "value": 6.6}
+2025-05-09T16:29:47.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 2, "count": 1}
+2025-05-09T16:29:47.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 2, "timestamp": 1746788385, "value": 7548}
+2025-05-09T16:29:49.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 1, "count": 1}
+2025-05-09T16:29:49.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 1, "count": 1}
+2025-05-09T16:29:49.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 2, "count": 1}
+2025-05-09T16:29:49.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 2, "count": 1}
+2025-05-09T16:29:49.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 1, "timestamp": 1746788388, "value": 63}
+2025-05-09T16:29:49.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 2, "count": 1}
+2025-05-09T16:29:49.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 2, "timestamp": 1746788388, "value": 8711}
+2025-05-09T16:29:49.830+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 2, "count": 1}
+2025-05-09T16:29:49.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 1, "count": 1}
+2025-05-09T16:29:49.830+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 1, "count": 1}
+2025-05-09T16:29:49.830+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 2, "timestamp": 1746788388, "value": 1565}
+2025-05-09T16:29:49.830+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 1, "timestamp": 1746788388, "value": 4.7}
+2025-05-09T16:29:49.830+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 2, "timestamp": 1746788388, "value": 7548}
+2025-05-09T16:29:49.830+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 2, "timestamp": 1746788388, "value": 6650}
+2025-05-09T16:29:49.830+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 1, "timestamp": 1746788388, "value": 6.3}
+2025-05-09T16:29:49.830+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 1, "timestamp": 1746788388, "value": 11}
+2025-05-09T16:29:53.828+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 2, "count": 1}
+2025-05-09T16:29:53.828+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 1, "count": 1}
+2025-05-09T16:29:53.828+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 2, "count": 1}
+2025-05-09T16:29:53.828+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 1, "counter_id": 1, "count": 1}
+2025-05-09T16:29:53.828+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 2, "timestamp": 1746788391, "value": 7550}
+2025-05-09T16:29:53.829+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 2, "counter_id": 1, "count": 1}
+2025-05-09T16:29:53.828+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 1, "count": 1}
+2025-05-09T16:29:53.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 2, "timestamp": 1746788391, "value": 8691}
+2025-05-09T16:29:53.828+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 3, "counter_id": 2, "count": 1}
+2025-05-09T16:29:53.828+0530	INFO	writer/writer.go:29	Writer received batch for ObjectId	{"object_id": 0, "counter_id": 2, "count": 1}
+2025-05-09T16:29:53.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 1, "counter_id": 1, "timestamp": 1746788391, "value": 9.2}
+2025-05-09T16:29:53.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 2, "counter_id": 1, "timestamp": 1746788391, "value": 11.9}
+2025-05-09T16:29:53.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 1, "timestamp": 1746788391, "value": 26.6}
+2025-05-09T16:29:53.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 1, "timestamp": 1746788391, "value": 7.9}
+2025-05-09T16:29:53.829+0530	INFO	writer/writer.go:104	metric	{"object_id": 3, "counter_id": 2, "timestamp": 1746788391, "value": 1564}
+2025-05-09T16:29:53.830+0530	INFO	writer/writer.go:104	metric	{"object_id": 0, "counter_id": 2, "timestamp": 1746788391, "value": 6613}

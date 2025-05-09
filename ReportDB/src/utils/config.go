@@ -13,15 +13,16 @@ import (
 // configuration structure
 
 type Config struct {
-	Writers            int    `json:"writers"`
-	Readers            int    `json:"readers"`
-	NumOfPartitions    int    `json:"num_of_partitions"`
-	BlockSize          int    `json:"block_size"`
-	MaxDevices         int    `json:"max_devices"`
-	IntialMmap         int    `json:"initial_mmap"`
-	MaxBlocksPerDevice int    `json:"max_blocks_per_device"`
-	BuffredChanSize    int    `json:"buffred_chan_size"`
-	StoragePath        string `json:"storage_path"`
+	Writers                 int    `json:"writers"`
+	Readers                 int    `json:"readers"`
+	NumOfPartitions         int    `json:"num_of_partitions"`
+	BlockSize               int    `json:"block_size"`
+	MaxDevices              int    `json:"max_devices"`
+	IntialMmap              int    `json:"initial_mmap"`
+	MaxBlocksPerDevice      int    `json:"max_blocks_per_device"`
+	BuffredChanSize         int    `json:"buffred_chan_size"`
+	StoragePath             string `json:"storage_path"`
+	IsProductionEnvironment bool   `json:"is_production_environment"`
 }
 
 // Counter Config
@@ -255,4 +256,10 @@ func GetCounterType(counterID uint16) (byte, error) {
 // Add this function to get storage path
 func GetStoragePath() string {
 	return config.StoragePath
+}
+
+func isProductionEnvironment() bool {
+
+	return config.IsProductionEnvironment
+
 }
