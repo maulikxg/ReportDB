@@ -1,7 +1,7 @@
-#NMS : Preview
+## NMS : Preview
 
+<img width="713" alt="image" src="https://github.com/user-attachments/assets/91caede8-e4a7-4bc4-8b2e-d55ac61feab1" />
 
-![image.png](attachment:6e760c3b-928c-4405-9fab-2e90c11663ad:image.png)
 
 ![image.png](attachment:2fccebd3-3ede-40fa-9b60-a60f14ccce1d:image.png)
 
