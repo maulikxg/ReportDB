@@ -1,30 +1,15 @@
 ## NMS : Preview
 
-<img width="713" alt="image" src="https://github.com/user-attachments/assets/91caede8-e4a7-4bc4-8b2e-d55ac61feab1" />
+<img width="711" alt="image" src="https://github.com/user-attachments/assets/e597a55d-b5cd-4a8f-8427-8dc2d61d301a" />
 
+<img width="711" alt="image" src="https://github.com/user-attachments/assets/1f2e8551-e729-476a-9a5c-5d063dde4ffb" />
 
-![image.png](attachment:2fccebd3-3ede-40fa-9b60-a60f14ccce1d:image.png)
+<img width="711" alt="image" src="https://github.com/user-attachments/assets/7fac392b-89a5-4714-a883-3a6324a00a7d" />
 
-![image.png](attachment:87feb733-e293-4602-ac96-61a17e2cfc22:image.png)
+<img width="711" alt="image" src="https://github.com/user-attachments/assets/5585cd4c-db8c-4ba1-b3fc-0a4d4b84c679" />
 
-![image.png](attachment:d0e42bd9-1dd9-43b1-8efb-8f6e916406da:image.png)
+<img width="711" alt="image" src="https://github.com/user-attachments/assets/832079ae-faaa-4572-9296-451148af3c7c" />
 
-![image.png](attachment:f32350b4-598a-4cab-a48e-c50aa7de30b7:image.png)
+<img width="713" alt="image" src="https://github.com/user-attachments/assets/e56781d9-9953-48d2-b855-1f93ad71a329" />
 
-![image.png](attachment:4966affa-2cee-4c13-9ee2-639b6acf9e0a:image.png)
-
-![image.png](attachment:4247f1fa-ede4-4914-9aa1-91c99ad8cf36:image.png)
-
-![image.png](attachment:bbd907c0-c6e0-48be-a0ff-1c8547bf6ba2:image.png)
-
-![image.png](attachment:ff100009-5fd3-4485-9d2d-1a005e3cac80:image.png)
-
-![image.png](attachment:7ec3abbd-b83a-4ae0-9da9-14c6b3de00ae:image.png)
-
-![image.png](attachment:269fbe94-e7d1-4654-9153-c9f50c02e3b8:image.png)
-
-![image.png](attachment:799f30e8-8053-489e-9d24-6ae34b8ff157:image.png)
-
-![image.png](attachment:8c584533-4eec-42c3-82fd-44bef34d2be0:image.png)
-
-![image.png](attachment:6bebb0d1-ac69-4f7a-a90b-bc8cfe21482f:image.png)
+<img width="640" alt="image" src="https://github.com/user-attachments/assets/9024344b-5937-432b-a955-79c929bb74cc" />
